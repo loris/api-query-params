@@ -128,6 +128,17 @@ test('filter: ignore default keys', t => {
   t.same(res.filter, { key: 'value' });
 });
 
+test('filter: ignore blacklisted keys', t => {
+  const res = aqp('key1=value1&key2=value2&key3=value3', {
+    blacklist: ['key1', 'key3'],
+  });
+  t.plan(4);
+  t.ok(res.filter);
+  t.notOk(res.filter.key1);
+  t.notOk(res.filter.key3);
+  t.same(res.filter, { key2: 'value2' });
+});
+
 test('skip', t => {
   const res = aqp('skip=10');
   t.plan(2);
@@ -197,5 +208,26 @@ test('complex response', t => {
     limit: 50,
     projection: { _id: -1, foo: 1 },
     sort: { a: 1, b: -1 },
+  });
+});
+
+test('query already parsed', t => {
+  const res = aqp({ key: 'foo', limit: '50' });
+  t.plan(2);
+  t.ok(res);
+  t.same(res, {
+    filter: {
+      key: 'foo',
+    },
+    limit: 50,
+  });
+});
+
+test('empty query', t => {
+  const res = aqp();
+  t.plan(2);
+  t.ok(res);
+  t.same(res, {
+    filter: {},
   });
 });

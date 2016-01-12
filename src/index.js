@@ -124,7 +124,7 @@ function getLimit(limit) {
   return Number(limit);
 }
 
-function getFilter(query, options = {}) {
+function getFilter(query, options) {
   options.blacklist = [
     'sort',
     'fields',
@@ -162,7 +162,7 @@ function getFilter(query, options = {}) {
 
 export default function (rawQuery = '', options = {}) {
   const result = {};
-  const query = qs.parse(rawQuery);
+  const query = typeof rawQuery === 'string' ? qs.parse(rawQuery) : rawQuery;
 
   result.filter = getFilter(query, options);
 
