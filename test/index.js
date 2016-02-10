@@ -181,11 +181,25 @@ test('projection (mix of includes/excludes)', t => {
   t.same(res.projection, { c: -1 });
 });
 
+test('projection (multiple keys)', t => {
+  const res = aqp('fields=a&fields=b');
+  t.plan(2);
+  t.ok(res);
+  t.same(res.projection, { a: 1, b: 1 });
+});
+
 test('sort', t => {
   const res = aqp('sort=a,+b,-c');
   t.plan(2);
   t.ok(res);
   t.same(res.sort, { a: 1, b: 1, c: -1 });
+});
+
+test('sort (multiple keys)', t => {
+  const res = aqp('sort=a&sort=-b');
+  t.plan(2);
+  t.ok(res);
+  t.same(res.sort, { a: 1, b: -1 });
 });
 
 test('complex response', t => {

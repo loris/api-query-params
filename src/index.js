@@ -76,8 +76,11 @@ function parseOperator(operator) {
  * like '+a,-b,c' to {a: 1, b: -1, c: 1}
  */
 function parseUnaries(unaries) {
-  return unaries
-    .split(',')
+  const unariesAsArray = typeof unaries === 'string'
+    ? unaries.split(',')
+    : unaries;
+
+  return unariesAsArray
     .map(x => x.match(/^(\+|-)?(.*)/))
     .reduce((result, [, val, key]) => {
       result[key.trim()] = val === '-' ? -1 : 1;
