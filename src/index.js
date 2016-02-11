@@ -151,6 +151,8 @@ function getFilter(query, options) {
         filter[key][op] = prefix === '!' ? false : true;
       } else if (op === '$eq') {
         filter[key] = value;
+      } else if (op === '$ne' && typeof value === 'object') {
+        filter[key].$not = value;
       } else {
         filter[key][op] = value;
       }

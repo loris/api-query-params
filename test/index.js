@@ -82,6 +82,13 @@ test('filter: $ne operator', t => {
   t.same(res.filter, { key: { $ne: 'value' } });
 });
 
+test('filter: $not operator (with regex)', t => {
+  const res = aqp('key!=/value/');
+  t.plan(2);
+  t.ok(res.filter);
+  t.same(res.filter, { key: { $not: /value/ } });
+});
+
 test('filter: $in operator (multiple keys)', t => {
   const res = aqp('key=a&key=b');
   t.plan(2);
