@@ -128,6 +128,22 @@ test('filter: ignore default keys', t => {
   t.same(res.filter, { key: 'value' });
 });
 
+test('filter: ignore custom keys', t => {
+  const res = aqp('key=value&$skip=0&$limit=10&$fields=id,name&$sort=name', {
+    skipKey: '$skip',
+    limitKey: '$limit',
+    projectionKey: '$fields',
+    sortKey: '$sort',
+  });
+  t.plan(6);
+  t.ok(res.filter);
+  t.notOk(res.filter.$skip);
+  t.notOk(res.filter.$limit);
+  t.notOk(res.filter.$fields);
+  t.notOk(res.filter.$sort);
+  t.same(res.filter, { key: 'value' });
+});
+
 test('filter: ignore blacklisted keys', t => {
   const res = aqp('key1=value1&key2=value2&key3=value3', {
     blacklist: ['key1', 'key3'],
@@ -146,8 +162,22 @@ test('skip', t => {
   t.equal(res.skip, 10);
 });
 
+test('skip (custom key)', t => {
+  const res = aqp('offset=10', { skipKey: 'offset' });
+  t.plan(2);
+  t.ok(res);
+  t.equal(res.skip, 10);
+});
+
 test('limit', t => {
   const res = aqp('limit=10');
+  t.plan(2);
+  t.ok(res);
+  t.equal(res.limit, 10);
+});
+
+test('limit (custom key)', t => {
+  const res = aqp('max=10', { limitKey: 'max' });
   t.plan(2);
   t.ok(res);
   t.equal(res.limit, 10);
@@ -188,6 +218,13 @@ test('projection (multiple keys)', t => {
   t.same(res.projection, { a: 1, b: 1 });
 });
 
+test('projection (custom key)', t => {
+  const res = aqp('select=a,b,c', { projectionKey: 'select' });
+  t.plan(2);
+  t.ok(res);
+  t.same(res.projection, { a: 1, b: 1, c: 1 });
+});
+
 test('sort', t => {
   const res = aqp('sort=a,+b,-c');
   t.plan(2);
@@ -197,6 +234,13 @@ test('sort', t => {
 
 test('sort (multiple keys)', t => {
   const res = aqp('sort=a&sort=-b');
+  t.plan(2);
+  t.ok(res);
+  t.same(res.sort, { a: 1, b: -1 });
+});
+
+test('sort (custom key)', t => {
+  const res = aqp('order=a,-b', { sortKey: 'order' });
   t.plan(2);
   t.ok(res);
   t.same(res.sort, { a: 1, b: -1 });

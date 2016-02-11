@@ -128,13 +128,6 @@ function getLimit(limit) {
 }
 
 function getFilter(query, options) {
-  options.blacklist = [
-    'sort',
-    'fields',
-    'skip',
-    'limit',
-  ].concat(options.blacklist);
-
   return Object.keys(query)
     .filter(val => options.blacklist.indexOf(val) === -1)
     .reduce((filter, val) => {
@@ -163,24 +156,31 @@ function getFilter(query, options) {
     }, {});
 }
 
+const operators = {
+  projection: { method: getProjection, defaultKey: 'fields' },
+  sort: { method: getSort, defaultKey: 'sort' },
+  skip: { method: getSkip, defaultKey: 'skip' },
+  limit: { method: getLimit, defaultKey: 'limit' },
+};
+
 export default function (rawQuery = '', options = {}) {
   const result = {};
   const query = typeof rawQuery === 'string' ? qs.parse(rawQuery) : rawQuery;
 
-  result.filter = getFilter(query, options);
+  options.blacklist = options.blacklist || [];
 
-  if (query.sort) {
-    result.sort = getSort(query.sort);
-  }
-  if (query.fields) {
-    result.projection = getProjection(query.fields);
-  }
-  if (query.skip) {
-    result.skip = getSkip(query.skip);
-  }
-  if (query.limit) {
-    result.limit = getLimit(query.limit);
-  }
+  Object.keys(operators)
+    .forEach(op => {
+      const key = options[`${op}Key`] || operators[op].defaultKey;
+      options.blacklist.push(key);
+
+      if (query.hasOwnProperty(key)) {
+        const value = query[key];
+        result[op] = operators[op].method(value);
+      }
+    });
+
+  result.filter = getFilter(query, options);
 
   return result;
 }
