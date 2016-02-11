@@ -129,7 +129,10 @@ function getLimit(limit) {
 
 function getFilter(query, options) {
   return Object.keys(query)
-    .filter(val => options.blacklist.indexOf(val) === -1)
+    .filter(val =>
+      options.blacklist.indexOf(val) === -1
+      && (!options.whitelist || options.whitelist.indexOf(val) !== -1)
+    )
     .reduce((filter, val) => {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value

@@ -155,6 +155,17 @@ test('filter: ignore blacklisted keys', t => {
   t.same(res.filter, { key2: 'value2' });
 });
 
+test('filter: ignore all but whitelisted keys', t => {
+  const res = aqp('key1=value1&key2=value2&key3=value3', {
+    whitelist: ['key2'],
+  });
+  t.plan(4);
+  t.ok(res.filter);
+  t.notOk(res.filter.key1);
+  t.notOk(res.filter.key3);
+  t.same(res.filter, { key2: 'value2' });
+});
+
 test('skip', t => {
   const res = aqp('skip=10');
   t.plan(2);
