@@ -75,7 +75,7 @@ function parseOperator(operator) {
  * Map/reduce helper to transform list of unaries
  * like '+a,-b,c' to {a: 1, b: -1, c: 1}
  */
-function parseUnaries(unaries) {
+function parseUnaries(unaries, values = { plus: 1, minus: -1 }) {
   const unariesAsArray = typeof unaries === 'string'
     ? unaries.split(',')
     : unaries;
@@ -83,13 +83,13 @@ function parseUnaries(unaries) {
   return unariesAsArray
     .map(x => x.match(/^(\+|-)?(.*)/))
     .reduce((result, [, val, key]) => {
-      result[key.trim()] = val === '-' ? -1 : 1;
+      result[key.trim()] = val === '-' ? values.minus : values.plus;
       return result;
     }, {});
 }
 
 function getProjection(projection) {
-  const fields = parseUnaries(projection);
+  const fields = parseUnaries(projection, { plus: 1, minus: 0 });
 
   /*
     From the MongoDB documentation:

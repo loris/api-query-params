@@ -212,21 +212,21 @@ test('projection (includes + _id exclude)', t => {
   const res = aqp('fields=a,b,-_id');
   t.plan(2);
   t.ok(res);
-  t.same(res.projection, { a: 1, b: 1, _id: -1 });
+  t.same(res.projection, { a: 1, b: 1, _id: 0 });
 });
 
 test('projection (excludes)', t => {
   const res = aqp('fields=-a,-b,-c');
   t.plan(2);
   t.ok(res);
-  t.same(res.projection, { a: -1, b: -1, c: -1 });
+  t.same(res.projection, { a: 0, b: 0, c: 0 });
 });
 
 test('projection (mix of includes/excludes)', t => {
   const res = aqp('fields=a,b,-c');
   t.plan(2);
   t.ok(res);
-  t.same(res.projection, { c: -1 });
+  t.same(res.projection, { c: 0 });
 });
 
 test('projection (multiple keys)', t => {
@@ -282,7 +282,7 @@ test('complex response', t => {
     },
     skip: 10,
     limit: 50,
-    projection: { _id: -1, foo: 1 },
+    projection: { _id: 0, foo: 1 },
     sort: { a: 1, b: -1 },
   });
 });
