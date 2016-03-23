@@ -6,6 +6,8 @@ function castValue(type, value) {
   } else if (type === 'date') {
     return new Date(String(value));
   }
+
+  return undefined;
 }
 
 function parseValue(rawValue) {
@@ -69,6 +71,8 @@ function parseOperator(operator) {
   } else if (!operator) {
     return '$exists';
   }
+
+  return undefined;
 }
 
 /**
@@ -148,7 +152,7 @@ function getFilter(query, options) {
       if (Array.isArray(value)) {
         filter[key][op === '$ne' ? '$nin' : '$in'] = value;
       } else if (op === '$exists') {
-        filter[key][op] = prefix === '!' ? false : true;
+        filter[key][op] = prefix !== '!';
       } else if (op === '$eq') {
         filter[key] = value;
       } else if (op === '$ne' && typeof value === 'object') {
