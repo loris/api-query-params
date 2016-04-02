@@ -40,11 +40,18 @@ test('filter: date casting', t => {
   });
 });
 
-test('filter: force casting', t => {
-  const res = aqp('key1=string(10)&key2=date(2016)');
+test('filter: null casting', t => {
+  const res = aqp('key=null');
   t.plan(2);
   t.ok(res.filter);
-  t.same(res.filter, { key1: '10', key2: new Date('2016') });
+  t.same(res.filter, { key: null });
+});
+
+test('filter: force casting', t => {
+  const res = aqp('key1=string(10)&key2=date(2016)&key3=string(null)');
+  t.plan(2);
+  t.ok(res.filter);
+  t.same(res.filter, { key1: '10', key2: new Date('2016'), key3: 'null' });
 });
 
 test('filter: $gt operator', t => {

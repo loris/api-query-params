@@ -39,6 +39,11 @@ function parseValue(rawValue) {
     return false;
   }
 
+  // Match null
+  if (value === 'null') {
+    return null;
+  }
+
   // Match numbers
   if (!isNaN(Number(value))) {
     return Number(value);
