@@ -12,11 +12,11 @@
     "lint": "eslint src test",
     "check": "npm run lint -s && dependency-check package.json --entry src",
     "watch": "watch 'npm run build' src test",
-    "test": "babel-node test/index.js | tspec",
+    "test": "ava",
     "prebuild": "npm run check -s && npm run clean -s",
     "build": "babel --optional runtime src -d dist",
     "postbuild": "npm run test -s",
-    "coverage": "babel-node node_modules/isparta/bin/isparta cover test/index.js",
+    "coverage": "nyc npm test && nyc report --reporter=html",
     "coveralls": "npm run coverage -s && coveralls < coverage/lcov.info",
     "postcoveralls": "rimraf ./coverage",
     "prepublish": "npm run build -s",
@@ -31,6 +31,12 @@
     "type": "git",
     "url": "git+https://github.com/loris/api-query-params.git"
   },
+  "ava": {
+    "verbose": true,
+    "require": [
+      "babel-core/register"
+    ]
+  },
   "keywords": [
     "node",
     "api",
@@ -44,6 +50,7 @@
   },
   "homepage": "https://github.com/loris/api-query-params#readme",
   "devDependencies": {
+    "ava": "0.13.0",
     "babel-cli": "6.6.5",
     "babel-core": "6.7.4",
     "babel-eslint": "6.0.2",
@@ -53,10 +60,9 @@
     "doctoc": "1.0.0",
     "eslint": "2.6.0",
     "eslint-config-airbnb": "6.2.0",
-    "isparta": "*",
+    "eslint-plugin-ava": "1.4.1",
+    "nyc": "6.1.1",
     "rimraf": "2.5.2",
-    "tap-spec": "*",
-    "tape": "4.5.1",
     "watch": "*"
   }
 }
