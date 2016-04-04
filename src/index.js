@@ -6,8 +6,6 @@ function castValue(type, value) {
   } else if (type === 'date') {
     return new Date(String(value));
   }
-
-  return undefined;
 }
 
 function parseValue(rawValue) {
@@ -76,8 +74,6 @@ function parseOperator(operator) {
   } else if (!operator) {
     return '$exists';
   }
-
-  return undefined;
 }
 
 /**
