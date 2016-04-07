@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/loris/api-query-params#readme",
   "devDependencies": {
-    "ava": "0.13.0",
+    "ava": "0.14.0",
     "babel-cli": "6.6.5",
     "babel-core": "6.7.4",
     "babel-eslint": "6.0.2",
