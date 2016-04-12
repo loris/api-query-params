@@ -7,7 +7,7 @@ test('filter: basic', t => {
   t.deepEqual(res.filter, { key: 'value' });
 });
 
-test('filter: numeric casting', t => {
+test('filter: number casting', t => {
   const res = aqp('key1=10&key2=1.2&key3=0');
   t.truthy(res);
   t.deepEqual(res.filter, { key1: 10, key2: 1.2, key3: 0 });

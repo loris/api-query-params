@@ -24,12 +24,26 @@ npm i --save api-query-params
 
 ## Usage
 
-#### Basic usage
+#### API
 
-Call the default method (exported as `aqp` here for easier manipulation) with a query string (or already parsed object). The resulting object contains the following properties:
+`aqp(queryString, [opts])`
+
+> Converts `queryString` into a MongoDB query object
+
+###### Arguments
+
+- `queryString`: query string part of the requested API URL (ie, `firstName=John&limit=10`). Works with already parsed object too (ie, `{status: 'success'}`) [required]
+- `opts`: object for advanced options (See below) [optional] 
+
+###### Returns
+
+The resulting object contains the following properties:
+
 - `filter` which contains the query criteria
 - `projection` which contains the query projection
 - `sort`, `skip`, `limit` which contains the cursor modifiers
+
+#### Example 
 
 ```js
 import aqp from 'api-query-params';
@@ -38,7 +52,7 @@ const query = aqp('status=sent&timestamp>2016-01-01&author.firstName=/john/i&lim
 //  {
 //    filter: {
 //      status: 'sent',
-//      timestamp: { '$gt': Fri Jan 01 2016 01:00:00 GMT+0100 (CET) },
+//      timestamp: { $gt: Fri Jan 01 2016 01:00:00 GMT+0100 (CET) },
 //      'author.firstName': /john/i
 //    },
 //    sort: { timestamp: -1 },
@@ -76,52 +90,106 @@ app.get('/users', (req, res, next) => {
 
 That's it. Your `/users` endpoint can now query, filter, sort your `User` mongoose model and more.
 
-#### Supported operators
+## Supported features
 
-- `$eq`	using `=`. Matches values that are equal to a specified value.
+#### Filtering operators
+
+| MongoDB | URI | Example | Result |
+| ------- | --- | ------- | ------ |
+| `$eq` | `key=val` | `type=public` | `{filter: {type: 'public'}}` |
+| `$gt` | `key>val` | `count>5` | `{filter: {count: {$gt: 5}}}` |
+| `$gte` | `key>=val` | `rating>=9.5` | `{filter: {rating: {$gte: 9.5}}}` |
+| `$lt` | `key<val` | `createdAt<2016-01-01` | `{filter: {createdAt: {$lt: Fri Jan 01 2016 01:00:00 GMT+0100 (CET)}}}` |
+| `$lte` | `key<=val` | `score<=-5` | `{filter: {score: {$lte: -5}}}` |
+| `$ne` | `key!=val` | `status!=success` | `{filter: {status: {$ne: 'success'}}}` |
+| `$in` | `key=val1,val2` | `country=GB,US` | `{filter: {country: {$in: ['GB', 'US']}}}` |
+| `$nin` | `key!=val1,val2` | `lang!=fr,en` | `{filter: {lang: {$nin: ['fr', 'en']}}}` |
+| `$exists` | `key` | `phone` | `{filter: {phone: {$exists: true}}}` |
+| `$exists` | `!key` | `!email` | `{filter: {email: {$exists: false}}}` |
+| `$regex` | `key=/value/<opts>` | `email=/@gmail\.com$/i` | `{filter: {email: /@gmail.com$/i}}` |
+| `$regex` | `key!=/value/<opts>` | `phone!=/^06/` | `{filter: {phone: { $not: /^06/}}}` |
+
+#### Skip / Limit operators
+
+- Useful to limit the number of records returned.
+- Default operator keys are `skip` and `limit`.
+
 ```js
-aqp('type=public');
-//  { filter: { type: 'public' } }
+aqp('skip=5&limit=10');
+//  {
+//    skip: 5,
+//    limit: 10
+//  }
 ```
 
-$eq	Matches values that are equal to a specified value.
-$gt	Matches values that are greater than a specified value.
-$gte	Matches values that are greater than or equal to a specified value.
-$lt	Matches values that are less than a specified value.
-$lte	Matches values that are less than or equal to a specified value.
-$ne	Matches all values that are not equal to a specified value.
-$in	Matches any of the values specified in an array.
-$nin	Matches none of the values specified in an array.
+#### Projection operator
 
-$or	Joins query clauses with a logical OR returns all documents that match the conditions of either clause.
-$and	Joins query clauses with a logical AND returns all documents that match the conditions of both clauses.
-$not	Inverts the effect of a query expression and returns documents that do not match the query expression.
-$nor	Joins query clauses with a logical NOR returns all documents that fail to match both clauses.
+- Useful to limit fields to return in each records.
+- Default operator key is `fields`.
+- It accepts a comma-separated list of fields. Default behavior is to specify fields to return. Use `-` prefixes to return all fields except some specific fields.
+- Due to a MongoDB limitation, you cannot combine inclusion and exclusion semantics in a single projection with the exception of the _id field.
 
-$regex	Selects documents where values match a specified regular expression.
-
-- Condition on embedded document with `.` notation
 ```js
-aqp('followers[0].id=123');
+aqp('fields=id,url');
+//  {
+//    projection: { id: 1, url: 1}
+//  }
+```
+
+```js
+aqp('fields=-_id,-email');
+//  {
+//    projection: { _id: 0, email: 0 }
+//  }
+```
+
+#### Sort operator
+
+- Useful to sort returned records.
+- Default operator key is `sort`.
+- It accepts a comma-separated list of fields. Default behavior is to sort in ascending order. Use `-` prefixes to sort in descending order.
+
+```js
+aqp('sort=-points,createdAt');
+//  {
+//    sort: { points: -1, createdAt: 1 }
+//  }
+```
+
+#### Keys with multiple values
+
+Any operators which process a list of fields (`$in`, `$nin`, sort and projection) can accept a comma-separated string or multiple pairs of key/value:
+
+- `country=GB,US` is equivalent to `country=GB&country=US`
+- `sort=-createdAt,lastName` is equivalent to `sort=-createdAt&sort=lastName`
+
+#### Embedded documents using `.` notation
+
+Any operators can be applied on deep properties using `.` notation:
+
+```js
+aqp('followers[0].id=123&sort=-metadata.created_at');
 //  {
 //    filter: {
 //      'followers[0].id': 123,
-//    }
+//    },
+//    sort: { 'metadata.created_at': -1 }
 //  }
 ```
 
 #### Automatic type casting
 
-The following type are automatically casted: `Integer`, `Regex`, `Date`, `Boolean`:
+The following types are automatically casted: `Number`, `RegExp`, `Date` and `Boolean`. `null` string is also casted:
 
 ```js
-aqp('date=2016-01-01&boolean=true&integer=10&regexp=/foobar/i');
+aqp('date=2016-01-01&boolean=true&integer=10&regexp=/foobar/i&null=null');
 // {
 //   filter: {
 //     date: Fri Jan 01 2016 01:00:00 GMT+0100 (CET),
 //     boolean: true,
 //     integer: 10,
-//     regexp: /foobar/i
+//     regexp: /foobar/i,
+//     null: null
 //   }
 // }
 ```
@@ -129,15 +197,58 @@ aqp('date=2016-01-01&boolean=true&integer=10&regexp=/foobar/i');
 If you need to disable or force type casting, you can wrap the values with `string()` or `date()` operators:
 
 ```js
-aqp('key1=string(10)&key2=date(2016)');
+aqp('key1=string(10)&key2=date(2016)&key3=string(null)');
 // {
 //   filter: {
 //     key1: '10',
-//     key2: Fri Jan 01 2016 01:00:00 GMT+0100 (CET)
+//     key2: Fri Jan 01 2016 01:00:00 GMT+0100 (CET),
+//     key3: 'null'
 //   }
 // }
 ```
 
+## Available options (`opts`)
+
+#### Customize operator keys
+
+The following options are useful to change the operator default keys:
+
+- `skipKey`: custom skip operator key (default is `skip`)
+- `limitKey`: custom limit operator key (default is `limit`)
+- `projectionKey`: custom projection operator key (default is `fields`)
+- `sortKey`: custom sort operator key (default is `sort`)
+
+```js
+aqp('organizationId=123&offset=10&max=125', {
+  limitKey: 'max',
+  skipKey: 'offset'
+});
+// {
+//   filter: {
+//     organizationId: 123,
+//   },
+//   skip: 10,
+//   limit: 125
+// }
+```
+
+#### Blacklist / Whitelist
+
+The following options are useful to specify which keys to use in the `filter` object. (ie, avoid that authentication parameter like `apiKey` ends up in a mongoDB query). All operator keys are (`sort`, `limit`, etc.) already ignored.
+
+- `blacklist`: filter on all keys except the ones specified
+- `whitelist`: filter only on the keys specified
+
+```js
+aqp('id=e9117e5c-c405-489b-9c12-d9f398c7a112&apiKey=foobar', {
+  blacklist: ['apiKey']
+});
+// {
+//   filter: {
+//     id: 'e9117e5c-c405-489b-9c12-d9f398c7a112',
+//   }
+// }
+```
 
 ## License
 
