@@ -17,7 +17,7 @@
     "build": "babel --optional runtime src -d dist",
     "postbuild": "npm run test -s",
     "coverage": "nyc npm test && nyc report --reporter=html",
-    "coveralls": "npm run coverage -s && coveralls < coverage/lcov.info",
+    "coveralls": "npm run coverage -s && coveralls < ./coverage/lcov.info",
     "postcoveralls": "rimraf ./coverage",
     "prepublish": "npm run build -s",
     "deploy": "git pull --rebase origin master && git push origin master",
