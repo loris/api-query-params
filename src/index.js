@@ -110,11 +110,12 @@ function getProjection(projection) {
     }, new Set()).size > 1;
 
   if (hasMixedValues) {
-    for (const key in fields) {
-      if (fields[key] === 1) {
-        delete fields[key];
-      }
-    }
+    Object.keys(fields)
+      .forEach(key => {
+        if (fields[key] === 1) {
+          delete fields[key];
+        }
+      });
   }
 
   return fields;

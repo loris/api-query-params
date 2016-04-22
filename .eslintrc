@@ -4,7 +4,7 @@
     "node": true,
     "es6": true
   },
-  "extends": ["airbnb/base", "plugin:ava/recommended"],
+  "extends": ["airbnb-base", "plugin:ava/recommended"],
   "plugins": ["ava"],
   "rules": {
     "no-param-reassign": [2, { "props": false }],
