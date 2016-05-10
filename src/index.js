@@ -185,7 +185,7 @@ export default function (rawQuery = '', options = {}) {
       const key = options[`${op}Key`] || operators[op].defaultKey;
       options.blacklist.push(key);
 
-      if (query.hasOwnProperty(key)) {
+      if (query[key]) {
         const value = query[key];
         result[op] = operators[op].method(value);
       }
