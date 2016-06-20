@@ -64,7 +64,7 @@
     "eslint-plugin-import": "1.8.0",
     "nyc": "6.4.4",
     "rimraf": "2.5.2",
-    "watch": "0.18.0"
+    "watch": "0.19.1"
   },
   "dependencies": {}
 }
