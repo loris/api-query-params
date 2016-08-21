@@ -109,6 +109,21 @@ That's it. Your `/users` endpoint can now query, filter, sort your `User` mongoo
 | `$regex` | `key=/value/<opts>` | `email=/@gmail\.com$/i` | `{filter: {email: /@gmail.com$/i}}` |
 | `$regex` | `key!=/value/<opts>` | `phone!=/^06/` | `{filter: {phone: { $not: /^06/}}}` |
 
+For more advanced usage (`$or`, `$type`, `$elemMatch`, etc.), pass any MongoDB query filter object as JSON string in the `filter` query parameter, ie:
+
+```js
+aqp('filter={"$or":[{"key1":"value1"},{"key2":"value2"}]}');
+//  {
+//    filter: {
+//      $or: [
+//        { key1: 'value1' },
+//        { key2: 'value2' }
+//      ]
+//    },
+//  }
+```
+
+
 #### Skip / Limit operators
 
 - Useful to limit the number of records returned.
@@ -217,6 +232,7 @@ The following options are useful to change the operator default keys:
 - `limitKey`: custom limit operator key (default is `limit`)
 - `projectionKey`: custom projection operator key (default is `fields`)
 - `sortKey`: custom sort operator key (default is `sort`)
+- `filterKey`: custom filter operator key (default is `filter`)
 
 ```js
 aqp('organizationId=123&offset=10&max=125', {

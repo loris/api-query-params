@@ -113,6 +113,25 @@ test('filter: $exists operator', t => {
   t.deepEqual(res.filter, { key1: { $exists: true }, key2: { $exists: false } });
 });
 
+test('filter: advanced usage with filter param', t => {
+  const res = aqp('filter={"$or":[{"key1":"value1"},{"key2":"value2"}]}');
+  t.truthy(res);
+  t.deepEqual(res.filter, { $or: [{ key1: 'value1' }, { key2: 'value2' }] });
+});
+
+test('filter: filter param overrides other operators', t => {
+  const res = aqp('foo=bar&filter={"key":"value"}');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: 'value' });
+});
+
+test('filter: invalid JSON string throws error', t => {
+  t.throws(
+    () => aqp('filter={key:value1}'),
+    'Invalid JSON string: {key:value1}'
+  );
+});
+
 test('filter: ignore default keys', t => {
   const res = aqp('key=value&skip=0&limit=10&fields=id,name&sort=name');
   t.truthy(res);

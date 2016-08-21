@@ -133,13 +133,21 @@ function getLimit(limit) {
   return Number(limit);
 }
 
-function getFilter(query, options) {
+function getFilter(filter, query, options) {
+  if (filter) {
+    try {
+      return JSON.parse(filter);
+    } catch (err) {
+      throw new Error(`Invalid JSON string: ${filter}`);
+    }
+  }
+
   return Object.keys(query)
     .filter(val =>
       options.blacklist.indexOf(val) === -1
       && (!options.whitelist || options.whitelist.indexOf(val) !== -1)
     )
-    .reduce((filter, val) => {
+    .reduce((result, val) => {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, _op, _value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
@@ -147,32 +155,33 @@ function getFilter(query, options) {
       const value = parseValue(_value);
       const op = parseOperator(_op);
 
-      if (!filter[key]) {
-        filter[key] = {};
+      if (!result[key]) {
+        result[key] = {};
       }
 
       if (Array.isArray(value)) {
-        filter[key][op === '$ne' ? '$nin' : '$in'] = value;
+        result[key][op === '$ne' ? '$nin' : '$in'] = value;
       } else if (op === '$exists') {
-        filter[key][op] = prefix !== '!';
+        result[key][op] = prefix !== '!';
       } else if (op === '$eq') {
-        filter[key] = value;
+        result[key] = value;
       } else if (op === '$ne' && typeof value === 'object') {
-        filter[key].$not = value;
+        result[key].$not = value;
       } else {
-        filter[key][op] = value;
+        result[key][op] = value;
       }
 
-      return filter;
+      return result;
     }, {});
 }
 
-const operators = {
-  projection: { method: getProjection, defaultKey: 'fields' },
-  sort: { method: getSort, defaultKey: 'sort' },
-  skip: { method: getSkip, defaultKey: 'skip' },
-  limit: { method: getLimit, defaultKey: 'limit' },
-};
+const operators = [
+  { operator: 'projection', method: getProjection, defaultKey: 'fields' },
+  { operator: 'sort', method: getSort, defaultKey: 'sort' },
+  { operator: 'skip', method: getSkip, defaultKey: 'skip' },
+  { operator: 'limit', method: getLimit, defaultKey: 'limit' },
+  { operator: 'filter', method: getFilter, defaultKey: 'filter' },
+];
 
 export default function (rawQuery = '', options = {}) {
   const result = {};
@@ -180,18 +189,15 @@ export default function (rawQuery = '', options = {}) {
 
   options.blacklist = options.blacklist || [];
 
-  Object.keys(operators)
-    .forEach(op => {
-      const key = options[`${op}Key`] || operators[op].defaultKey;
-      options.blacklist.push(key);
+  operators.forEach(({ operator, method, defaultKey }) => {
+    const key = options[`${operator}Key`] || defaultKey;
+    const value = query[key];
+    options.blacklist.push(key);
 
-      if (query[key]) {
-        const value = query[key];
-        result[op] = operators[op].method(value);
-      }
-    });
-
-  result.filter = getFilter(query, options);
+    if (value || operator === 'filter') {
+      result[operator] = method(value, query, options);
+    }
+  });
 
   return result;
 }
