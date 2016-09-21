@@ -8,9 +8,9 @@ test('filter: basic', t => {
 });
 
 test('filter: number casting', t => {
-  const res = aqp('key1=10&key2=1.2&key3=0');
+  const res = aqp('key1=10&key2=1.2&key3=0&key4=0001');
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: 10, key2: 1.2, key3: 0 });
+  t.deepEqual(res.filter, { key1: 10, key2: 1.2, key3: 0, key4: '0001' });
 });
 
 test('filter: boolean casting', t => {

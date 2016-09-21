@@ -42,8 +42,8 @@ function parseValue(rawValue) {
     return null;
   }
 
-  // Match numbers
-  if (!isNaN(Number(value))) {
+  // Match numbers (string padded with zeros are not numbers)
+  if (!isNaN(Number(value)) && !/^0[0-9]+/.test(value)) {
     return Number(value);
   }
 
