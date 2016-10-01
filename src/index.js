@@ -143,10 +143,6 @@ function getFilter(filter, query, options) {
   }
 
   return Object.keys(query)
-    .filter(val =>
-      options.blacklist.indexOf(val) === -1
-      && (!options.whitelist || options.whitelist.indexOf(val) !== -1)
-    )
     .reduce((result, val) => {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value
@@ -171,6 +167,13 @@ function getFilter(filter, query, options) {
         result[key][op] = value;
       }
 
+      const result_keys = Object.keys(result);
+
+      for(var item in result_keys) { // iterate all defined filter keys
+        if(!(options.blacklist.indexOf(result_keys[item]) === -1  // does not exist in blacklist
+        && (!options.whitelist || options.whitelist.indexOf(result_keys[item]) !== -1))) // and can be defined in whitelist
+          delete result[result_keys[item]]; // delete item from result
+      }
       return result;
     }, {});
 }
