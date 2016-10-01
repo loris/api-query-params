@@ -160,7 +160,7 @@ test('filter: ignore custom keys', t => {
 });
 
 test('filter: ignore blacklisted keys', t => {
-  const res = aqp('key1=value1&key2=value2&key3=value3', {
+  const res = aqp('key1>value1&key2=value2&key3<=value3', {
     blacklist: ['key1', 'key3'],
   });
   t.truthy(res);
@@ -171,7 +171,7 @@ test('filter: ignore blacklisted keys', t => {
 });
 
 test('filter: ignore all but whitelisted keys', t => {
-  const res = aqp('key1=value1&key2=value2&key3=value3', {
+  const res = aqp('key1>value1&key2=value2&!key3', {
     whitelist: ['key2'],
   });
   t.truthy(res);

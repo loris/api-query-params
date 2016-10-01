@@ -143,18 +143,17 @@ function getFilter(filter, query, options) {
   }
 
   return Object.keys(query)
-    .filter(val =>
-      options.blacklist.indexOf(val) === -1
-      && (!options.whitelist || options.whitelist.indexOf(val) !== -1)
-    )
-    .reduce((result, val) => {
+    .map(val => {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value
-      const [, prefix, key, _op, _value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
-
-      const value = parseValue(_value);
-      const op = parseOperator(_op);
-
+      const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
+      return { prefix, key, op: parseOperator(op), value: parseValue(value) };
+    })
+    .filter(({ key }) =>
+      options.blacklist.indexOf(key) === -1
+      && (!options.whitelist || options.whitelist.indexOf(key) !== -1)
+    )
+    .reduce((result, { prefix, key, op, value }) => {
       if (!result[key]) {
         result[key] = {};
       }
