@@ -54,7 +54,6 @@
   "devDependencies": {
     "babel-cli": "6.16.0",
     "babel-core": "6.17.0",
-    "babel-eslint": "7.0.0",
     "babel-preset-es2015": "6.16.0",
     "coveralls": "2.11.14",
     "dependency-check": "2.6.0",
