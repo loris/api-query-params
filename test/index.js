@@ -156,7 +156,7 @@ test('filter: filter param overrides other operators', t => {
 test('filter: invalid JSON string throws error', t => {
   t.throws(
     () => aqp('filter={key:value1}'),
-    'Invalid JSON string: {key:value1}'
+    'Invalid JSON string: {key:value1}',
   );
 });
 
