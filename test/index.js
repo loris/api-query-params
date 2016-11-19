@@ -47,6 +47,17 @@ test('filter: force casting', t => {
   t.deepEqual(res.filter, { key1: '10', key2: new Date('2016'), key3: 'null' });
 });
 
+test('filter: custom casters', t => {
+  const res = aqp('key1=lowercase(VALUE)&key2=int(10.5)', {
+    customCasters: {
+      lowercase: val => val.toLowerCase(),
+      int: val => parseInt(val, 10),
+    },
+  });
+  t.truthy(res);
+  t.deepEqual(res.filter, { key1: 'value', key2: 10 });
+});
+
 test('filter: $gt operator', t => {
   const res = aqp('key>value');
   t.truthy(res);

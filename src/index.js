@@ -1,14 +1,11 @@
 import qs from 'querystring';
 
-function castValue(type, value) {
-  if (type === 'string') {
-    return String(value);
-  } else if (type === 'date') {
-    return new Date(String(value));
-  }
-}
+const builtInCasters = {
+  string: val => String(val),
+  date: val => new Date(String(val)),
+};
 
-function parseValue(rawValue) {
+function parseValue(rawValue, { customCasters }) {
   const value = rawValue.trim();
 
   if (value.includes(',')) {
@@ -18,9 +15,10 @@ function parseValue(rawValue) {
   }
 
   // Match type casting operators like string(true)
-  const casting = value.match(/^(string|date)\((.*)\)$/);
-  if (casting) {
-    return castValue(casting[1], casting[2]);
+  const casters = { ...builtInCasters, ...customCasters };
+  const casting = value.match(/^(\w+)\((.*)\)$/);
+  if (casting && casters[casting[1]]) {
+    return casters[casting[1]](casting[2]);
   }
 
   // Match regex operators like /foo_\d+/i
@@ -147,7 +145,7 @@ function getFilter(filter, query, options) {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
-      return { prefix, key, op: parseOperator(op), value: parseValue(value) };
+      return { prefix, key, op: parseOperator(op), value: parseValue(value, options) };
     })
     .filter(({ key }) =>
       options.blacklist.indexOf(key) === -1
