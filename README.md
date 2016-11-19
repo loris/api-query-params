@@ -209,7 +209,7 @@ aqp('date=2016-01-01&boolean=true&integer=10&regexp=/foobar/i&null=null');
 // }
 ```
 
-If you need to disable or force type casting, you can wrap the values with `string()` or `date()` operators:
+If you need to disable or force type casting, you can wrap the values with `string()`, `date()` built-in casters or by specifying your own custom functions (See below):
 
 ```js
 aqp('key1=string(10)&key2=date(2016)&key3=string(null)');
@@ -265,6 +265,57 @@ aqp('id=e9117e5c-c405-489b-9c12-d9f398c7a112&apiKey=foobar', {
 //   }
 // }
 ```
+
+#### Add custom casting functions
+
+You can specify you own casting functions to apply to query parameter values, either by explicitly wrapping the value in URL with your custom function name (See example below) or by implictly mapping a key to a function (See `Specify casting per param keys` below)
+
+- `casters`: object to specify custom casters, key is the caster name, and value is a function which is passed the query parameter value as parameter.
+
+```js
+aqp('key1=lowercase(VALUE)&key2=int(10.5)', {
+  casters: {
+    lowercase: val => val.toLowerCase(),
+    int: val => parseInt(val, 10),
+  },
+});
+// {
+//   filter: {
+//     key1: 'value',
+//     key2: 10,
+//   }
+// }
+```
+
+#### Specify casting per param keys
+
+You can specify how query parameter values are casted by passing an object. 
+
+- `castParams`: object which map keys to casters (built-in or custom ones using the `casters` option).
+
+```js
+aqp('key1=VALUE&key2=10.5&key3=20&key4=foo', {
+  casters: {
+    lowercase: val => val.toLowerCase(),
+    int: val => parseInt(val, 10),
+  },
+  castParams: {
+    key1: 'lowercase',
+    key2: 'int',
+    key3: 'string',
+    key4: 'unknown',
+  },
+});
+// {
+//   filter: {
+//     key1: 'value',
+//     key2: 10,
+//     key3: '20',
+//     key4: 'foo',
+//   }
+// }
+```
+
 
 ## License
 
