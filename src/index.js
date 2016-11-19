@@ -5,9 +5,7 @@ const builtInCasters = {
   date: val => new Date(String(val)),
 };
 
-function parseValue(rawValue, { customCasters }) {
-  const value = rawValue.trim();
-
+function parseValue(value, key, options = {}) {
   if (value.includes(',')) {
     return value
       .split(',')
@@ -15,10 +13,15 @@ function parseValue(rawValue, { customCasters }) {
   }
 
   // Match type casting operators like string(true)
-  const casters = { ...builtInCasters, ...customCasters };
+  const casters = { ...builtInCasters, ...options.casters };
   const casting = value.match(/^(\w+)\((.*)\)$/);
   if (casting && casters[casting[1]]) {
     return casters[casting[1]](casting[2]);
+  }
+
+  // Apply casters per params
+  if (options.castParams && options.castParams[key] && casters[options.castParams[key]]) {
+    return casters[options.castParams[key]](value);
   }
 
   // Match regex operators like /foo_\d+/i
@@ -145,11 +148,11 @@ function getFilter(filter, query, options) {
       const join = query[val] ? `${val}=${query[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
-      return { prefix, key, op: parseOperator(op), value: parseValue(value, options) };
+      return { prefix, key, op: parseOperator(op), value: parseValue(value, key, options) };
     })
     .filter(({ key }) =>
       options.blacklist.indexOf(key) === -1
-      && (!options.whitelist || options.whitelist.indexOf(key) !== -1)
+      && (!options.whitelist || options.whitelist.indexOf(key) !== -1),
     )
     .reduce((result, { prefix, key, op, value }) => {
       if (!result[key]) {

@@ -49,13 +49,30 @@ test('filter: force casting', t => {
 
 test('filter: custom casters', t => {
   const res = aqp('key1=lowercase(VALUE)&key2=int(10.5)', {
-    customCasters: {
+    casters: {
       lowercase: val => val.toLowerCase(),
       int: val => parseInt(val, 10),
     },
   });
   t.truthy(res);
   t.deepEqual(res.filter, { key1: 'value', key2: 10 });
+});
+
+test('filter: force param casting ', t => {
+  const res = aqp('key1=VALUE&key2=10.5&key3=20&key4=foo', {
+    casters: {
+      lowercase: val => val.toLowerCase(),
+      int: val => parseInt(val, 10),
+    },
+    castParams: {
+      key1: 'lowercase',
+      key2: 'int',
+      key3: 'string',
+      key4: 'unknown',
+    },
+  });
+  t.truthy(res);
+  t.deepEqual(res.filter, { key1: 'value', key2: 10, key3: '20', key4: 'foo' });
 });
 
 test('filter: $gt operator', t => {
