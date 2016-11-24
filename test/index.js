@@ -147,10 +147,10 @@ test('filter: advanced usage with filter param', t => {
   t.deepEqual(res.filter, { $or: [{ key1: 'value1' }, { key2: 'value2' }] });
 });
 
-test('filter: filter param overrides other operators', t => {
+test('filter: filter param merges with other operators', t => {
   const res = aqp('foo=bar&filter={"key":"value"}');
   t.truthy(res);
-  t.deepEqual(res.filter, { key: 'value' });
+  t.deepEqual(res.filter, { foo: 'bar', key: 'value' });
 });
 
 test('filter: invalid JSON string throws error', t => {

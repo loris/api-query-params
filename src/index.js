@@ -134,18 +134,19 @@ function getLimit(limit) {
   return Number(limit);
 }
 
-function getFilter(filter, query, options) {
-  if (filter) {
-    try {
-      return JSON.parse(filter);
-    } catch (err) {
-      throw new Error(`Invalid JSON string: ${filter}`);
-    }
+function parseFilter(filter) {
+  try {
+    return JSON.parse(filter);
+  } catch (err) {
+    throw new Error(`Invalid JSON string: ${filter}`);
   }
+}
 
-  return Object.keys(query)
+function getFilter(filter, params, options) {
+  const parsedFilter = filter ? parseFilter(filter) : {};
+  return Object.keys(params)
     .map(val => {
-      const join = query[val] ? `${val}=${query[val]}` : val;
+      const join = params[val] ? `${val}=${params[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
       return { prefix, key, op: parseOperator(op), value: parseValue(value, key, options) };
@@ -172,7 +173,7 @@ function getFilter(filter, query, options) {
       }
 
       return result;
-    }, {});
+    }, parsedFilter);
 }
 
 const operators = [
@@ -183,19 +184,19 @@ const operators = [
   { operator: 'filter', method: getFilter, defaultKey: 'filter' },
 ];
 
-export default function (rawQuery = '', options = {}) {
+export default function (query = '', options = {}) {
   const result = {};
-  const query = typeof rawQuery === 'string' ? qs.parse(rawQuery) : rawQuery;
+  const params = typeof query === 'string' ? qs.parse(query) : query;
 
   options.blacklist = options.blacklist || [];
 
   operators.forEach(({ operator, method, defaultKey }) => {
     const key = options[`${operator}Key`] || defaultKey;
-    const value = query[key];
+    const value = params[key];
     options.blacklist.push(key);
 
     if (value || operator === 'filter') {
-      result[operator] = method(value, query, options);
+      result[operator] = method(value, params, options);
     }
   });
 
