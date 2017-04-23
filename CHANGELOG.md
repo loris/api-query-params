@@ -1,3 +1,7 @@
+4.3.1 / 2017-04-23
+==================
+ * custom casters are now properly applied on arrays (fix #81)
+ 
 4.3.0 / 2016-11-24
 ==================
  * `filter` JSON parameter now gets merged with other query params instead of replacing them
