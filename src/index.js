@@ -9,7 +9,7 @@ function parseValue(value, key, options = {}) {
   if (value.includes(',')) {
     return value
       .split(',')
-      .map(parseValue);
+      .map(arrayVal => parseValue(arrayVal, key, options));
   }
 
   // Match type casting operators like string(true)
