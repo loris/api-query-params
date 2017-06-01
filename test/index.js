@@ -155,11 +155,17 @@ test('filter: filter param merges with other operators', t => {
   t.deepEqual(res.filter, { foo: 'bar', key: 'value' });
 });
 
-test('filter: invalid JSON string throws error', t => {
+test('filter: filter param throws error if invalid JSON string', t => {
   t.throws(
     () => aqp('filter={key:value1}'),
     'Invalid JSON string: {key:value1}',
   );
+});
+
+test('filter: filter param skips JSON parsing if already an object', t => {
+  const res = aqp({ foo: 'bar', filter: { $or: [{ key1: 'value1' }, { key2: 'value2' }] } });
+  t.truthy(res);
+  t.deepEqual(res.filter, { foo: 'bar', $or: [{ key1: 'value1' }, { key2: 'value2' }] });
 });
 
 test('filter: ignore default keys', t => {

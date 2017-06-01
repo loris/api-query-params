@@ -136,6 +136,10 @@ function getLimit(limit) {
 
 function parseFilter(filter) {
   try {
+    if (typeof filter === 'object') {
+      return filter;
+    }
+
     return JSON.parse(filter);
   } catch (err) {
     throw new Error(`Invalid JSON string: ${filter}`);
