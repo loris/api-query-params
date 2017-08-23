@@ -1,3 +1,11 @@
+4.5.0 / 2017-08-23
+==================
+ * provide as commonjs module (thx @SergKazakov)
+
+4.4.0 / 2017-06-01
+==================
+ * skip JSON parsing on filter param if already parsed
+
 4.3.1 / 2017-04-23
 ==================
  * custom casters are now properly applied on arrays (fix #81)
