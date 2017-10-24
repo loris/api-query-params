@@ -72,7 +72,7 @@ import User from './models/User';
 const app = express();
 
 app.get('/users', (req, res, next) => {
-  const { query, skip, limit, sort, projection } = aqp(req.query);
+  const { filter, skip, limit, sort, projection } = aqp(req.query);
   User
     .find(filter)
     .skip(skip)
