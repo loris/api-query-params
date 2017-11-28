@@ -1,3 +1,7 @@
+4.5.1 / 2017-11-28
+==================
+ * properly handle comma-separated values (thx @bolzon)
+
 4.5.0 / 2017-08-23
 ==================
  * provide as commonjs module (thx @SergKazakov)
