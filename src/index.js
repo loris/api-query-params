@@ -6,7 +6,7 @@ const builtInCasters = {
 };
 
 function parseValue(value, key, options = {}) {
-  if (value.includes(',')) {
+  if (!/^\/.*\/i?$/.test(value) && value.includes(',')) {
     return value
       .split(',')
       .map(arrayVal => parseValue(arrayVal, key, options));
