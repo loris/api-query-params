@@ -6,10 +6,10 @@ const builtInCasters = {
 };
 
 function parseValue(value, key, options = {}) {
-  if (value.includes(',')) {
-    return value
-      .split(',')
-      .map(arrayVal => parseValue(arrayVal, key, options));
+  // Handle comma-separated values
+  const parts = value.match(/(?:[^,/]+|\/[^/]*\/)+/g);
+  if (parts && parts.length > 1) {
+    return parts.map(part => parseValue(part, key, options));
   }
 
   // Match type casting operators like string(true)

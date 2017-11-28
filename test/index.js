@@ -20,9 +20,9 @@ test('filter: boolean casting', t => {
 });
 
 test('filter: regex casting', t => {
-  const res = aqp('key1=/regex/&key2=/regexi/i');
+  const res = aqp('key1=/regex/&key2=/regexi/i&key3=/^regex, with comma$/');
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: /regex/, key2: /regexi/i });
+  t.deepEqual(res.filter, { key1: /regex/, key2: /regexi/i, key3: /^regex, with comma$/ });
 });
 
 test('filter: date casting', t => {
@@ -119,10 +119,22 @@ test('filter: $in operator (multiple keys)', t => {
   t.deepEqual(res.filter, { key: { $in: ['a', 'b'] } });
 });
 
-test('filter: $in operator (comma separated)', t => {
+test('filter: $in operator (comma-separated)', t => {
   const res = aqp('key=a,b');
   t.truthy(res);
   t.deepEqual(res.filter, { key: { $in: ['a', 'b'] } });
+});
+
+test('filter: $in operator (comma-separated regexes)', t => {
+  const res = aqp('key=/a/,/b/');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: { $in: [/a/, /b/] } });
+});
+
+test('filter: $in operator (comma-separated regexes containing commas)', t => {
+  const res = aqp('key=/a,b/,/b,a/');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: { $in: [/a,b/, /b,a/] } });
 });
 
 test('filter: $nin operator (multiple keys)', t => {
@@ -131,7 +143,7 @@ test('filter: $nin operator (multiple keys)', t => {
   t.deepEqual(res.filter, { key: { $nin: ['a', 'b'] } });
 });
 
-test('filter: $nin operator (comma separated)', t => {
+test('filter: $nin operator (comma-separated)', t => {
   const res = aqp('key!=a,b');
   t.truthy(res);
   t.deepEqual(res.filter, { key: { $nin: ['a', 'b'] } });
