@@ -135,14 +135,20 @@ function getLimit(limit) {
 }
 
 function parseFilter(filter) {
-  try {
-    if (typeof filter === 'object') {
-      return filter;
-    }
+  if (typeof filter === 'object') {
+    return filter;
+  }
 
+  try {
     return JSON.parse(filter);
-  } catch (err) {
-    throw new Error(`Invalid JSON string: ${filter}`);
+  } catch (jsonErr) {
+    try {
+      let parsedFilter = filter;
+      eval(`parsedFilter = ${filter}`);
+      return parsedFilter;
+    } catch (evalErr) {
+      throw new Error(`Invalid filter string: ${filter}`);
+    }
   }
 }
 
