@@ -34,6 +34,7 @@ function parseValue(value, key, options = {}) {
   if (value === 'true') {
     return true;
   }
+
   if (value === 'false') {
     return false;
   }
@@ -44,7 +45,7 @@ function parseValue(value, key, options = {}) {
   }
 
   // Match numbers (string padded with zeros are not numbers)
-  if (!isNaN(Number(value)) && !/^0[0-9]+/.test(value)) {
+  if (!Number.isNaN(Number(value)) && !/^0[0-9]+/.test(value)) {
     return Number(value);
   }
 
@@ -62,17 +63,29 @@ function parseValue(value, key, options = {}) {
 function parseOperator(operator) {
   if (operator === '=') {
     return '$eq';
-  } else if (operator === '!=') {
+  }
+
+  if (operator === '!=') {
     return '$ne';
-  } else if (operator === '>') {
+  }
+
+  if (operator === '>') {
     return '$gt';
-  } else if (operator === '>=') {
+  }
+
+  if (operator === '>=') {
     return '$gte';
-  } else if (operator === '<') {
+  }
+
+  if (operator === '<') {
     return '$lt';
-  } else if (operator === '<=') {
+  }
+
+  if (operator === '<=') {
     return '$lte';
-  } else if (!operator) {
+  }
+
+  if (!operator) {
     return '$exists';
   }
 }
@@ -153,13 +166,15 @@ function getFilter(filter, params, options) {
       const join = params[val] ? `${val}=${params[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
-      return { prefix, key, op: parseOperator(op), value: parseValue(value, key, options) };
+      return {
+        prefix, key, op: parseOperator(op), value: parseValue(value, key, options),
+      };
     })
-    .filter(({ key }) =>
-      options.blacklist.indexOf(key) === -1
-      && (!options.whitelist || options.whitelist.indexOf(key) !== -1),
-    )
-    .reduce((result, { prefix, key, op, value }) => {
+    .filter(({ key }) => options.blacklist.indexOf(key) === -1
+      && (!options.whitelist || options.whitelist.indexOf(key) !== -1))
+    .reduce((result, {
+      prefix, key, op, value,
+    }) => {
       if (!result[key]) {
         result[key] = {};
       }

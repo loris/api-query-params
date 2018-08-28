@@ -10,7 +10,9 @@ test('filter: basic', t => {
 test('filter: number casting', t => {
   const res = aqp('key1=10&key2=1.2&key3=0&key4=0001');
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: 10, key2: 1.2, key3: 0, key4: '0001' });
+  t.deepEqual(res.filter, {
+    key1: 10, key2: 1.2, key3: 0, key4: '0001',
+  });
 });
 
 test('filter: boolean casting', t => {
@@ -74,7 +76,9 @@ test('filter: force param casting', t => {
     },
   });
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: 'value', key2: 10, key3: '20', key4: 'foo', key5: { $in: ['foo', 'bar'] } });
+  t.deepEqual(res.filter, {
+    key1: 'value', key2: 10, key3: '20', key4: 'foo', key5: { $in: ['foo', 'bar'] },
+  });
 });
 
 test('filter: $gt operator', t => {
