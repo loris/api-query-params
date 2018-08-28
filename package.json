@@ -30,12 +30,6 @@
     "type": "git",
     "url": "git+https://github.com/loris/api-query-params.git"
   },
-  "ava": {
-    "verbose": true,
-    "require": [
-      "babel-core/register"
-    ]
-  },
   "keywords": [
     "node",
     "api",
@@ -49,20 +43,21 @@
   },
   "homepage": "https://github.com/loris/api-query-params#readme",
   "dependencies": {
-    "ava": "0.25.0"
   },
   "devDependencies": {
+    "ava": "1.0.0-beta.7",
     "@babel/cli": "7.0.0",
     "@babel/core": "7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "7.0.0",
     "@babel/preset-env": "7.0.0",
-    "babel-plugin-add-module-exports": "0.2.1",
+    "@babel/register": "7.0.0",
     "coveralls": "3.0.2",
     "dependency-check": "3.2.0",
     "eslint": "5.4.0",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-plugin-ava": "5.1.0",
     "eslint-plugin-import": "2.14.0",
+    "esm": "3.0.80",
     "nyc": "13.0.1",
     "rimraf": "2.6.2",
     "watch": "1.0.2"

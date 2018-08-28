@@ -1,5 +1,5 @@
-import test from 'ava';
-import aqp from '../src';
+const test = require('ava');
+const aqp = require('../src').default;
 
 test('filter: basic', t => {
   const res = aqp('key=value');
