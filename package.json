@@ -1,6 +1,6 @@
 {
   "name": "api-query-params",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "dist/index.js",
   "files": [
@@ -42,15 +42,14 @@
     "url": "https://github.com/loris/api-query-params/issues"
   },
   "homepage": "https://github.com/loris/api-query-params#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "ava": "1.0.0-beta.7",
     "@babel/cli": "7.0.0",
     "@babel/core": "7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "7.0.0",
     "@babel/preset-env": "7.0.0",
     "@babel/register": "7.0.0",
+    "ava": "1.0.0-beta.7",
     "coveralls": "3.0.2",
     "dependency-check": "3.2.0",
     "eslint": "5.4.0",
