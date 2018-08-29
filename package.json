@@ -1,9 +1,11 @@
 {
   "name": "api-query-params",
-  "version": "4.7.1",
+  "version": "4.7.2",
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "dist/cjs/index.js",
-  "files": ["dist/"],
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "babel ./src/index.js --out-file ./dist/cjs/index.js",
     "coverage": "nyc npm test && nyc report --reporter=html",
@@ -19,7 +21,12 @@
     "type": "git",
     "url": "git+https://github.com/loris/api-query-params.git"
   },
-  "keywords": ["node", "api", "query parameters", "mongodb"],
+  "keywords": [
+    "node",
+    "api",
+    "query parameters",
+    "mongodb"
+  ],
   "author": "Loris Guignard <loris.guignard@gmail.com>",
   "license": "MIT",
   "bugs": {
