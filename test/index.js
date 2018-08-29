@@ -11,7 +11,10 @@ test('filter: number casting', t => {
   const res = aqp('key1=10&key2=1.2&key3=0&key4=0001');
   t.truthy(res);
   t.deepEqual(res.filter, {
-    key1: 10, key2: 1.2, key3: 0, key4: '0001',
+    key1: 10,
+    key2: 1.2,
+    key3: 0,
+    key4: '0001',
   });
 });
 
@@ -24,7 +27,11 @@ test('filter: boolean casting', t => {
 test('filter: regex casting', t => {
   const res = aqp('key1=/regex/&key2=/regexi/i&key3=/^regex, with comma$/');
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: /regex/, key2: /regexi/i, key3: /^regex, with comma$/ });
+  t.deepEqual(res.filter, {
+    key1: /regex/,
+    key2: /regexi/i,
+    key3: /^regex, with comma$/,
+  });
 });
 
 test('filter: date casting', t => {
@@ -61,23 +68,30 @@ test('filter: custom casters', t => {
 });
 
 test('filter: force param casting', t => {
-  const res = aqp('key1=VALUE&key2=10.5&key3=20&key4=foo&key5=   foo   ,  bar', {
-    casters: {
-      lowercase: val => val.toLowerCase(),
-      int: val => parseInt(val, 10),
-      trim: val => val.trim(),
-    },
-    castParams: {
-      key1: 'lowercase',
-      key2: 'int',
-      key3: 'string',
-      key4: 'unknown',
-      key5: 'trim',
-    },
-  });
+  const res = aqp(
+    'key1=VALUE&key2=10.5&key3=20&key4=foo&key5=   foo   ,  bar',
+    {
+      casters: {
+        lowercase: val => val.toLowerCase(),
+        int: val => parseInt(val, 10),
+        trim: val => val.trim(),
+      },
+      castParams: {
+        key1: 'lowercase',
+        key2: 'int',
+        key3: 'string',
+        key4: 'unknown',
+        key5: 'trim',
+      },
+    }
+  );
   t.truthy(res);
   t.deepEqual(res.filter, {
-    key1: 'value', key2: 10, key3: '20', key4: 'foo', key5: { $in: ['foo', 'bar'] },
+    key1: 'value',
+    key2: 10,
+    key3: '20',
+    key4: 'foo',
+    key5: { $in: ['foo', 'bar'] },
   });
 });
 
@@ -156,7 +170,10 @@ test('filter: $nin operator (comma-separated)', t => {
 test('filter: $exists operator', t => {
   const res = aqp('key1&!key2');
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: { $exists: true }, key2: { $exists: false } });
+  t.deepEqual(res.filter, {
+    key1: { $exists: true },
+    key2: { $exists: false },
+  });
 });
 
 test('filter: advanced usage with filter param', t => {
@@ -174,14 +191,20 @@ test('filter: filter param merges with other operators', t => {
 test('filter: filter param throws error if invalid JSON string', t => {
   t.throws(
     () => aqp('filter={key:value1}'),
-    'Invalid JSON string: {key:value1}',
+    'Invalid JSON string: {key:value1}'
   );
 });
 
 test('filter: filter param skips JSON parsing if already an object', t => {
-  const res = aqp({ foo: 'bar', filter: { $or: [{ key1: 'value1' }, { key2: 'value2' }] } });
+  const res = aqp({
+    foo: 'bar',
+    filter: { $or: [{ key1: 'value1' }, { key2: 'value2' }] },
+  });
   t.truthy(res);
-  t.deepEqual(res.filter, { foo: 'bar', $or: [{ key1: 'value1' }, { key2: 'value2' }] });
+  t.deepEqual(res.filter, {
+    foo: 'bar',
+    $or: [{ key1: 'value1' }, { key2: 'value2' }],
+  });
 });
 
 test('filter: ignore default keys', t => {

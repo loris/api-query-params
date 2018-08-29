@@ -5,7 +5,7 @@ const builtInCasters = {
   date: val => new Date(String(val)),
 };
 
-function parseValue(value, key, options = {}) {
+const parseValue = (value, key, options = {}) => {
   // Handle comma-separated values
   const parts = value.match(/(?:[^,/]+|\/[^/]*\/)+/g);
   if (parts && parts.length > 1) {
@@ -20,7 +20,11 @@ function parseValue(value, key, options = {}) {
   }
 
   // Apply casters per params
-  if (options.castParams && options.castParams[key] && casters[options.castParams[key]]) {
+  if (
+    options.castParams &&
+    options.castParams[key] &&
+    casters[options.castParams[key]]
+  ) {
     return casters[options.castParams[key]](value);
   }
 
@@ -50,17 +54,17 @@ function parseValue(value, key, options = {}) {
   }
 
   // Match YYYY-MM-DDTHH:mm:ssZ format dates
-  /* eslint-disable max-len */
-  const date = value.match(/[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T| )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?/);
-  /* eslint-enable max-len */
+  const date = value.match(
+    /[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T| )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?/
+  );
   if (date) {
     return new Date(value);
   }
 
   return value;
-}
+};
 
-function parseOperator(operator) {
+const parseOperator = operator => {
   if (operator === '=') {
     return '$eq';
   }
@@ -88,26 +92,25 @@ function parseOperator(operator) {
   if (!operator) {
     return '$exists';
   }
-}
+};
 
 /**
  * Map/reduce helper to transform list of unaries
  * like '+a,-b,c' to {a: 1, b: -1, c: 1}
  */
-function parseUnaries(unaries, values = { plus: 1, minus: -1 }) {
-  const unariesAsArray = typeof unaries === 'string'
-    ? unaries.split(',')
-    : unaries;
+const parseUnaries = (unaries, values = { plus: 1, minus: -1 }) => {
+  const unariesAsArray =
+    typeof unaries === 'string' ? unaries.split(',') : unaries;
 
   return unariesAsArray
-    .map(x => x.match(/^(\+|-)?(.*)/))
+    .map(unary => unary.match(/^(\+|-)?(.*)/))
     .reduce((result, [, val, key]) => {
       result[key.trim()] = val === '-' ? values.minus : values.plus;
       return result;
     }, {});
-}
+};
 
-function getProjection(projection) {
+const getProjection = projection => {
   const fields = parseUnaries(projection, { plus: 1, minus: 0 });
 
   /*
@@ -115,8 +118,8 @@ function getProjection(projection) {
     "A projection cannot contain both include and exclude specifications,
     except for the exclusion of the _id field."
   */
-  const hasMixedValues = Object.keys(fields)
-    .reduce((set, key) => {
+  const hasMixedValues =
+    Object.keys(fields).reduce((set, key) => {
       if (key !== '_id') {
         set.add(fields[key]);
       }
@@ -124,30 +127,23 @@ function getProjection(projection) {
     }, new Set()).size > 1;
 
   if (hasMixedValues) {
-    Object.keys(fields)
-      .forEach(key => {
-        if (fields[key] === 1) {
-          delete fields[key];
-        }
-      });
+    Object.keys(fields).forEach(key => {
+      if (fields[key] === 1) {
+        delete fields[key];
+      }
+    });
   }
 
   return fields;
-}
+};
 
-function getSort(sort) {
-  return parseUnaries(sort);
-}
+const getSort = sort => parseUnaries(sort);
 
-function getSkip(skip) {
-  return Number(skip);
-}
+const getSkip = skip => Number(skip);
 
-function getLimit(limit) {
-  return Number(limit);
-}
+const getLimit = limit => Number(limit);
 
-function parseFilter(filter) {
+const parseFilter = filter => {
   try {
     if (typeof filter === 'object') {
       return filter;
@@ -157,24 +153,30 @@ function parseFilter(filter) {
   } catch (err) {
     throw new Error(`Invalid JSON string: ${filter}`);
   }
-}
+};
 
-function getFilter(filter, params, options) {
+const getFilter = (filter, params, options) => {
   const parsedFilter = filter ? parseFilter(filter) : {};
   return Object.keys(params)
     .map(val => {
       const join = params[val] ? `${val}=${params[val]}` : val;
       // Separate key, operators and value
-      const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
+      const [, prefix, key, op, value] = join.match(
+        /(!?)([^><!=]+)([><]=?|!?=|)(.*)/
+      );
       return {
-        prefix, key, op: parseOperator(op), value: parseValue(value, key, options),
+        prefix,
+        key,
+        op: parseOperator(op),
+        value: parseValue(value, key, options),
       };
     })
-    .filter(({ key }) => options.blacklist.indexOf(key) === -1
-      && (!options.whitelist || options.whitelist.indexOf(key) !== -1))
-    .reduce((result, {
-      prefix, key, op, value,
-    }) => {
+    .filter(
+      ({ key }) =>
+        options.blacklist.indexOf(key) === -1 &&
+        (!options.whitelist || options.whitelist.indexOf(key) !== -1)
+    )
+    .reduce((result, { prefix, key, op, value }) => {
       if (!result[key]) {
         result[key] = {};
       }
@@ -193,7 +195,7 @@ function getFilter(filter, params, options) {
 
       return result;
     }, parsedFilter);
-}
+};
 
 const operators = [
   { operator: 'projection', method: getProjection, defaultKey: 'fields' },
@@ -203,7 +205,7 @@ const operators = [
   { operator: 'filter', method: getFilter, defaultKey: 'filter' },
 ];
 
-export default function (query = '', options = {}) {
+export default function(query = '', options = {}) {
   const result = {};
   const params = typeof query === 'string' ? qs.parse(query) : query;
 

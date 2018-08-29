@@ -42,12 +42,11 @@
     "coveralls": "3.0.2",
     "dependency-check": "3.2.0",
     "eslint": "5.4.0",
-    "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-ava": "5.1.0",
-    "eslint-plugin-import": "2.14.0",
+    "eslint-config-gowento": "5.1.2",
     "mkdirp": "0.5.1",
     "np": "3.0.4",
     "nyc": "13.0.1",
+    "prettier": "1.14.2",
     "rimraf": "2.6.2"
   }
 }
