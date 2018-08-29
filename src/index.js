@@ -5,7 +5,7 @@ const builtInCasters = {
   date: val => new Date(String(val)),
 };
 
-const parseValue = (value, key, options = {}) => {
+const parseValue = (value, key, options) => {
   // Handle comma-separated values
   const parts = value.match(/(?:[^,/]+|\/[^/]*\/)+/g);
   if (parts && parts.length > 1) {
@@ -89,9 +89,7 @@ const parseOperator = operator => {
     return '$lte';
   }
 
-  if (!operator) {
-    return '$exists';
-  }
+  return '$exists';
 };
 
 /**
