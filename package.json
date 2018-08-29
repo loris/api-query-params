@@ -2,29 +2,18 @@
   "name": "api-query-params",
   "version": "4.6.0",
   "description": "Convert query parameters from API urls to MongoDB queries",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
   "files": [
-    "bin/",
     "dist/"
   ],
   "scripts": {
-    "clean": "rimraf dist",
-    "lint": "eslint src test",
-    "check": "npm run lint -s && dependency-check package.json --entry src",
-    "watch": "watch 'npm run build' src test",
+    "build": "babel ./src/index.js --out-file ./dist/cjs/index.js",
+    "coverage": "nyc npm test",
+    "depcheck": "dependency-check ./package.json --no-default-entry ./src/index.js",
+    "lint": "eslint ./src ./test",
+    "prebuild": "npm run lint && npm run depcheck && rimraf ./dist && mkdirp ./dist/cjs",
     "test": "ava",
-    "prebuild": "npm run check -s && npm run clean -s",
-    "build": "babel --optional runtime src -d dist",
-    "postbuild": "npm run test -s",
-    "coverage": "nyc npm test && nyc report --reporter=html",
-    "coveralls": "npm run coverage -s && coveralls < ./coverage/lcov.info",
-    "postcoveralls": "rimraf ./coverage",
-    "prepublish": "npm run build -s",
-    "deploy": "git pull --rebase origin master && git push origin master",
-    "patch": "npm version patch && npm publish",
-    "minor": "npm version minor && npm publish",
-    "major": "npm version major && npm publish",
-    "postpublish": "git push origin master --follow-tags"
+    "release": "np"
   },
   "repository": {
     "type": "git",
@@ -49,16 +38,16 @@
     "@babel/plugin-proposal-object-rest-spread": "7.0.0",
     "@babel/preset-env": "7.0.0",
     "@babel/register": "7.0.0",
-    "ava": "1.0.0-beta.7",
+    "ava": "1.0.0-beta.8",
     "coveralls": "3.0.2",
     "dependency-check": "3.2.0",
     "eslint": "5.4.0",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-plugin-ava": "5.1.0",
     "eslint-plugin-import": "2.14.0",
-    "esm": "3.0.80",
+    "mkdirp": "0.5.1",
+    "np": "3.0.4",
     "nyc": "13.0.1",
-    "rimraf": "2.6.2",
-    "watch": "1.0.2"
+    "rimraf": "2.6.2"
   }
 }
