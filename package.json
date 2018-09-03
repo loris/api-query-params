@@ -10,12 +10,13 @@
     "build": "babel ./src/index.js --out-file ./dist/cjs/index.js",
     "coverage": "nyc npm test && nyc report --reporter=html",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-    "postcoveralls": "rimraf ./coverage",
     "depcheck": "dependency-check ./package.json --no-default-entry ./src/index.js",
     "lint": "eslint ./src ./test",
+    "postcoveralls": "rimraf ./coverage",
     "prebuild": "npm run lint && npm run depcheck && rimraf ./dist && mkdirp ./dist/cjs",
-    "test": "ava",
-    "release": "np"
+    "prepublish": "npm run build",
+    "release": "np",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
