@@ -203,7 +203,7 @@ const operators = [
   { operator: 'filter', method: getFilter, defaultKey: 'filter' },
 ];
 
-export default function(query = '', options = {}) {
+const aqp = (query = '', options = {}) => {
   const result = {};
   const params = typeof query === 'string' ? qs.parse(query) : query;
 
@@ -220,4 +220,6 @@ export default function(query = '', options = {}) {
   });
 
   return result;
-}
+};
+
+module.exports = aqp;
