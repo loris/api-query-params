@@ -36,20 +36,20 @@
   "homepage": "https://github.com/loris/api-query-params#readme",
   "dependencies": {},
   "devDependencies": {
-    "@babel/cli": "7.1.0",
-    "@babel/core": "7.1.0",
+    "@babel/cli": "7.1.5",
+    "@babel/core": "7.1.6",
     "@babel/plugin-proposal-object-rest-spread": "7.0.0",
-    "@babel/preset-env": "7.1.0",
+    "@babel/preset-env": "7.1.6",
     "@babel/register": "7.0.0",
     "ava": "1.0.0-beta.8",
     "coveralls": "3.0.2",
     "dependency-check": "3.2.1",
-    "eslint": "5.6.0",
+    "eslint": "5.9.0",
     "eslint-config-gowento": "5.3.2",
     "mkdirp": "0.5.1",
     "np": "3.0.4",
-    "nyc": "13.0.1",
-    "prettier": "1.14.3",
+    "nyc": "13.1.0",
+    "prettier": "1.15.2",
     "rimraf": "2.6.2"
   }
 }
