@@ -323,6 +323,12 @@ test('projection (custom key)', t => {
   t.deepEqual(res.projection, { a: 1, b: 1, c: 1 });
 });
 
+test('projection (JSON string)', t => {
+  const res = aqp('fields={"status":1,"comments":{"$slice":[20,10]}}');
+  t.truthy(res);
+  t.deepEqual(res.projection, { status: 1, comments: { $slice: [20, 10] } });
+});
+
 test('sort', t => {
   const res = aqp('sort=a,+b,-c');
   t.truthy(res);

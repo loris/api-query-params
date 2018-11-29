@@ -108,7 +108,20 @@ const parseUnaries = (unaries, values = { plus: 1, minus: -1 }) => {
     }, {});
 };
 
+const parseJSONString = string => {
+  try {
+    return JSON.parse(string);
+  } catch (err) {
+    return false;
+  }
+};
+
 const getProjection = projection => {
+  const jsonProjection = parseJSONString(projection);
+  if (jsonProjection) {
+    return jsonProjection;
+  }
+
   const fields = parseUnaries(projection, { plus: 1, minus: 0 });
 
   /*
@@ -142,15 +155,16 @@ const getSkip = skip => Number(skip);
 const getLimit = limit => Number(limit);
 
 const parseFilter = filter => {
-  try {
-    if (typeof filter === 'object') {
-      return filter;
-    }
-
-    return JSON.parse(filter);
-  } catch (err) {
-    throw new Error(`Invalid JSON string: ${filter}`);
+  if (typeof filter === 'object') {
+    return filter;
   }
+
+  const jsonFilter = parseJSONString(filter);
+  if (jsonFilter) {
+    return jsonFilter;
+  }
+
+  throw new Error(`Invalid JSON string: ${filter}`);
 };
 
 const getFilter = (filter, params, options) => {

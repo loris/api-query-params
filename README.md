@@ -33,7 +33,7 @@ npm i --save api-query-params
 ###### Arguments
 
 - `queryString`: query string part of the requested API URL (ie, `firstName=John&limit=10`). Works with already parsed object too (ie, `{status: 'success'}`) [required]
-- `opts`: object for advanced options (See below) [optional] 
+- `opts`: object for advanced options (See below) [optional]
 
 ###### Returns
 
@@ -43,12 +43,14 @@ The resulting object contains the following properties:
 - `projection` which contains the query projection
 - `sort`, `skip`, `limit` which contains the cursor modifiers
 
-#### Example 
+#### Example
 
 ```js
 import aqp from 'api-query-params';
 
-const query = aqp('status=sent&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&fields=id');
+const query = aqp(
+  'status=sent&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&fields=id'
+);
 //  {
 //    filter: {
 //      status: 'sent',
@@ -73,8 +75,7 @@ const app = express();
 
 app.get('/users', (req, res, next) => {
   const { filter, skip, limit, sort, projection } = aqp(req.query);
-  User
-    .find(filter)
+  User.find(filter)
     .skip(skip)
     .limit(limit)
     .sort(sort)
@@ -95,20 +96,20 @@ That's it. Your `/users` endpoint can now query, filter, sort your `User` mongoo
 
 #### Filtering operators
 
-| MongoDB | URI | Example | Result |
-| ------- | --- | ------- | ------ |
-| `$eq` | `key=val` | `type=public` | `{filter: {type: 'public'}}` |
-| `$gt` | `key>val` | `count>5` | `{filter: {count: {$gt: 5}}}` |
-| `$gte` | `key>=val` | `rating>=9.5` | `{filter: {rating: {$gte: 9.5}}}` |
-| `$lt` | `key<val` | `createdAt<2016-01-01` | `{filter: {createdAt: {$lt: Fri Jan 01 2016 01:00:00 GMT+0100 (CET)}}}` |
-| `$lte` | `key<=val` | `score<=-5` | `{filter: {score: {$lte: -5}}}` |
-| `$ne` | `key!=val` | `status!=success` | `{filter: {status: {$ne: 'success'}}}` |
-| `$in` | `key=val1,val2` | `country=GB,US` | `{filter: {country: {$in: ['GB', 'US']}}}` |
-| `$nin` | `key!=val1,val2` | `lang!=fr,en` | `{filter: {lang: {$nin: ['fr', 'en']}}}` |
-| `$exists` | `key` | `phone` | `{filter: {phone: {$exists: true}}}` |
-| `$exists` | `!key` | `!email` | `{filter: {email: {$exists: false}}}` |
-| `$regex` | `key=/value/<opts>` | `email=/@gmail\.com$/i` | `{filter: {email: /@gmail.com$/i}}` |
-| `$regex` | `key!=/value/<opts>` | `phone!=/^06/` | `{filter: {phone: { $not: /^06/}}}` |
+| MongoDB   | URI                  | Example                 | Result                                                                  |
+| --------- | -------------------- | ----------------------- | ----------------------------------------------------------------------- |
+| `$eq`     | `key=val`            | `type=public`           | `{filter: {type: 'public'}}`                                            |
+| `$gt`     | `key>val`            | `count>5`               | `{filter: {count: {$gt: 5}}}`                                           |
+| `$gte`    | `key>=val`           | `rating>=9.5`           | `{filter: {rating: {$gte: 9.5}}}`                                       |
+| `$lt`     | `key<val`            | `createdAt<2016-01-01`  | `{filter: {createdAt: {$lt: Fri Jan 01 2016 01:00:00 GMT+0100 (CET)}}}` |
+| `$lte`    | `key<=val`           | `score<=-5`             | `{filter: {score: {$lte: -5}}}`                                         |
+| `$ne`     | `key!=val`           | `status!=success`       | `{filter: {status: {$ne: 'success'}}}`                                  |
+| `$in`     | `key=val1,val2`      | `country=GB,US`         | `{filter: {country: {$in: ['GB', 'US']}}}`                              |
+| `$nin`    | `key!=val1,val2`     | `lang!=fr,en`           | `{filter: {lang: {$nin: ['fr', 'en']}}}`                                |
+| `$exists` | `key`                | `phone`                 | `{filter: {phone: {$exists: true}}}`                                    |
+| `$exists` | `!key`               | `!email`                | `{filter: {email: {$exists: false}}}`                                   |
+| `$regex`  | `key=/value/<opts>`  | `email=/@gmail\.com$/i` | `{filter: {email: /@gmail.com$/i}}`                                     |
+| `$regex`  | `key!=/value/<opts>` | `phone!=/^06/`          | `{filter: {phone: { $not: /^06/}}}`                                     |
 
 For more advanced usage (`$or`, `$type`, `$elemMatch`, etc.), pass any MongoDB query filter object as JSON string in the `filter` query parameter, ie:
 
@@ -123,7 +124,6 @@ aqp('filter={"$or":[{"key1":"value1"},{"key2":"value2"}]}');
 //    },
 //  }
 ```
-
 
 #### Skip / Limit operators
 
@@ -143,7 +143,8 @@ aqp('skip=5&limit=10');
 - Useful to limit fields to return in each records.
 - Default operator key is `fields`.
 - It accepts a comma-separated list of fields. Default behavior is to specify fields to return. Use `-` prefixes to return all fields except some specific fields.
-- Due to a MongoDB limitation, you cannot combine inclusion and exclusion semantics in a single projection with the exception of the _id field.
+- Due to a MongoDB limitation, you cannot combine inclusion and exclusion semantics in a single projection with the exception of the \_id field.
+- It also accepts JSON string to use more powerful projection operators (`$`, `$elemMatch` or `$slice`)
 
 ```js
 aqp('fields=id,url');
@@ -156,6 +157,13 @@ aqp('fields=id,url');
 aqp('fields=-_id,-email');
 //  {
 //    projection: { _id: 0, email: 0 }
+//  }
+```
+
+```js
+aqp('fields={"comments":{"$slice":[20,10]}}');
+//  {
+//    projection: { comments: { $slice: [ 20, 10 ] } }
 //  }
 ```
 
@@ -238,7 +246,7 @@ The following options are useful to change the operator default keys:
 ```js
 aqp('organizationId=123&offset=10&max=125', {
   limitKey: 'max',
-  skipKey: 'offset'
+  skipKey: 'offset',
 });
 // {
 //   filter: {
@@ -258,7 +266,7 @@ The following options are useful to specify which keys to use in the `filter` ob
 
 ```js
 aqp('id=e9117e5c-c405-489b-9c12-d9f398c7a112&apiKey=foobar', {
-  blacklist: ['apiKey']
+  blacklist: ['apiKey'],
 });
 // {
 //   filter: {
@@ -290,7 +298,7 @@ aqp('key1=lowercase(VALUE)&key2=int(10.5)', {
 
 #### Specify casting per param keys
 
-You can specify how query parameter values are casted by passing an object. 
+You can specify how query parameter values are casted by passing an object.
 
 - `castParams`: object which map keys to casters (built-in or custom ones using the `casters` option).
 
@@ -317,21 +325,16 @@ aqp('key1=VALUE&key2=10.5&key3=20&key4=foo', {
 // }
 ```
 
-
 ## License
 
 MIT © [Loris Guignard](http://github.com/loris)
 
 [npm-url]: https://npmjs.org/package/api-query-params
 [npm-image]: https://img.shields.io/npm/v/api-query-params.svg?style=flat-square
-
 [travis-url]: https://travis-ci.org/loris/api-query-params
 [travis-image]: https://img.shields.io/travis/loris/api-query-params.svg?style=flat-square
-
 [coveralls-url]: https://coveralls.io/r/loris/api-query-params
 [coveralls-image]: https://img.shields.io/coveralls/loris/api-query-params.svg?style=flat-square
-
 [depstat-url]: https://david-dm.org/loris/api-query-params
 [depstat-image]: https://david-dm.org/loris/api-query-params.svg?style=flat-square
-
 [download-badge]: http://img.shields.io/npm/dm/api-query-params.svg?style=flat-square
