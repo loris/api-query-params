@@ -32,12 +32,16 @@ test('filter: boolean casting', t => {
 });
 
 test('filter: regex casting', t => {
-  const res = aqp('key1=/regex/&key2=/regexi/i&key3=/^regex, with comma$/');
+  const res = aqp(
+    'key1=/regex/&key2=/regexi/i&key3=/^regex, with comma$/&key4=/flags/gm'
+  );
+
   t.truthy(res);
   t.deepEqual(res.filter, {
     key1: /regex/,
     key2: /regexi/i,
     key3: /^regex, with comma$/,
+    key4: /flags/gm,
   });
 });
 
@@ -382,5 +386,13 @@ test('empty query', t => {
   const res = aqp();
   t.deepEqual(res, {
     filter: {},
+  });
+});
+
+test('filter: handles value with slashes', t => {
+  const res = aqp('key=foo/bar');
+  t.truthy(res);
+  t.deepEqual(res.filter, {
+    key: 'foo/bar',
   });
 });

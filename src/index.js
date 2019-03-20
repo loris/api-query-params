@@ -7,7 +7,8 @@ const builtInCasters = {
 
 const parseValue = (value, key, options) => {
   // Handle comma-separated values
-  const parts = value.match(/(?:[^,/]+|\/[^/]*\/)+/g);
+  const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
+  const parts = regexes || value.split(',');
   if (parts && parts.length > 1) {
     return parts.map(part => parseValue(part, key, options));
   }
@@ -29,7 +30,7 @@ const parseValue = (value, key, options) => {
   }
 
   // Match regex operators like /foo_\d+/i
-  const regex = value.match(/^\/(.*)\/(i?)$/);
+  const regex = value.match(/^\/(.*)\/([igm]*)$/);
   if (regex) {
     return new RegExp(regex[1], regex[2]);
   }
