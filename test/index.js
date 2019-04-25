@@ -136,6 +136,12 @@ test('filter: $ne operator', t => {
   t.deepEqual(res.filter, { key: { $ne: 'value' } });
 });
 
+test('filter: $ne operator with null value', t => {
+  const res = aqp('key!=null');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: { $ne: null } });
+});
+
 test('filter: $not operator (with regex)', t => {
   const res = aqp('key!=/value/');
   t.truthy(res);
