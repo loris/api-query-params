@@ -200,7 +200,7 @@ const getFilter = (filter, params, options) => {
         result[key][op] = prefix !== '!';
       } else if (op === '$eq') {
         result[key] = value;
-      } else if (op === '$ne' && typeof value === 'object') {
+      } else if (op === '$ne' && typeof value === 'object' && value !== null) {
         result[key].$not = value;
       } else {
         result[key][op] = value;
