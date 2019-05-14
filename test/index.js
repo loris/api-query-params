@@ -46,12 +46,16 @@ test('filter: regex casting', t => {
 });
 
 test('filter: date casting', t => {
-  const res = aqp('key1=2016-04&key2=2016-04-12&key3=2016-04-02 08:00');
+  const res = aqp(
+    'key1=2016-04&key2=2016-04-12&key3=2016-04-02 08:00&key4=foo-2019-05-14-bar&key5=4999-30-50'
+  );
   t.truthy(res);
   t.deepEqual(res.filter, {
     key1: new Date('2016-04'),
     key2: new Date('2016-04-12'),
     key3: new Date('2016-04-02 08:00'),
+    key4: 'foo-2019-05-14-bar',
+    key5: '4999-30-50',
   });
 });
 
