@@ -343,6 +343,31 @@ test('projection (JSON string)', t => {
   t.deepEqual(res.projection, { status: 1, comments: { $slice: [20, 10] } });
 });
 
+test('populate', t => {
+  const res = aqp('populate=a,b,c');
+  t.truthy(res);
+  t.deepEqual(res.population, [{ path: 'a' }, { path: 'b' }, { path: 'c' }]);
+});
+
+test('populate and projection', t => {
+  const res = aqp('populate=a,b,c&fields=j,k,l,a.x,a.y,a.z,b.x,b.y');
+  t.truthy(res);
+  t.deepEqual(res.projection, { j: 1, k: 1, l: 1 });
+  t.deepEqual(res.population, [
+    {
+      path: 'a',
+      select: { x: 1, y: 1, z: 1 },
+    },
+    {
+      path: 'b',
+      select: { x: 1, y: 1 },
+    },
+    {
+      path: 'c',
+    },
+  ]);
+});
+
 test('sort', t => {
   const res = aqp('sort=a,+b,-c');
   t.truthy(res);

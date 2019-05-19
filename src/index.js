@@ -149,6 +149,16 @@ const getProjection = projection => {
   return fields;
 };
 
+const getPopulation = population => {
+  let paths = population.split(',');
+
+  paths = paths.map(path => {
+    return { path };
+  });
+
+  return paths;
+};
+
 const getSort = sort => parseUnaries(sort);
 
 const getSkip = skip => Number(skip);
@@ -210,7 +220,34 @@ const getFilter = (filter, params, options) => {
     }, parsedFilter);
 };
 
+const mergeProjectionAndPopulation = result => {
+  const projection = result.projection || {};
+  let population = result.population || [];
+
+  Object.keys(projection).forEach(key => {
+    // if field contains a .
+    if (key.indexOf('.') > -1) {
+      // Loop the population rows
+      population = population.map(row => {
+        const prefix = `${row.path}.`;
+        const unprefixedKey = key.replace(prefix, '');
+        // If field start with the name of the path, we add it to the `select` property
+        if (key.startsWith(prefix)) {
+          row.select = {
+            ...row.select,
+            [unprefixedKey]: projection[key],
+          };
+        }
+        return row;
+      });
+      // Remove field with . from the projection
+      delete projection[key];
+    }
+  });
+};
+
 const operators = [
+  { operator: 'population', method: getPopulation, defaultKey: 'populate' },
   { operator: 'projection', method: getProjection, defaultKey: 'fields' },
   { operator: 'sort', method: getSort, defaultKey: 'sort' },
   { operator: 'skip', method: getSkip, defaultKey: 'skip' },
@@ -233,6 +270,8 @@ const aqp = (query = '', options = {}) => {
       result[operator] = method(value, params, options);
     }
   });
+
+  mergeProjectionAndPopulation(result);
 
   return result;
 };
