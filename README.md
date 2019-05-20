@@ -42,6 +42,7 @@ The resulting object contains the following properties:
 - `filter` which contains the query criteria
 - `projection` which contains the query projection
 - `sort`, `skip`, `limit` which contains the cursor modifiers
+- `population` which contains the query population ([mongoose feature only](https://mongoosejs.com/docs/populate.html))
 
 #### Example
 
@@ -49,7 +50,7 @@ The resulting object contains the following properties:
 import aqp from 'api-query-params';
 
 const query = aqp(
-  'status=sent&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&fields=id'
+  'status=sent&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&populate=logs&fields=id,logs.ip'
 );
 //  {
 //    filter: {
@@ -60,7 +61,8 @@ const query = aqp(
 //    sort: { timestamp: -1 },
 //    skip: 50,
 //    limit: 100,
-//    projection: { id: 1 }
+//    projection: { id: 1 },
+//    population: [ { path: 'logs', select: { ip: 1 } } ]
 //  }
 ```
 
@@ -74,12 +76,13 @@ import User from './models/User';
 const app = express();
 
 app.get('/users', (req, res, next) => {
-  const { filter, skip, limit, sort, projection } = aqp(req.query);
+  const { filter, skip, limit, sort, projection, population } = aqp(req.query);
   User.find(filter)
     .skip(skip)
     .limit(limit)
     .sort(sort)
     .select(projection)
+    .populate(population)
     .exec((err, users) => {
       if (err) {
         return next(err);
@@ -180,6 +183,21 @@ aqp('sort=-points,createdAt');
 //  }
 ```
 
+#### Population operator
+
+- Useful to populate (reference documents in other collections) returned records. This is a [mongoose-only feature](https://mongoosejs.com/docs/populate.html).
+- Default operator key is `populate`.
+- It accepts a comma-separated list of fields.
+- It extracts projection on populated documents from the `projection` object.
+
+```js
+aqp('populate=a,b&fields=foo,bar,a.baz');
+// {
+//    population: [ { path: 'a', select: { baz: 1 } } ],
+//    projection: { foo: 1, bar: 1 },
+//  }
+```
+
 #### Keys with multiple values
 
 Any operators which process a list of fields (`$in`, `$nin`, sort and projection) can accept a comma-separated string or multiple pairs of key/value:
@@ -242,6 +260,7 @@ The following options are useful to change the operator default keys:
 - `projectionKey`: custom projection operator key (default is `fields`)
 - `sortKey`: custom sort operator key (default is `sort`)
 - `filterKey`: custom filter operator key (default is `filter`)
+- `populationKey`: custom populate operator key (default is `populate`)
 
 ```js
 aqp('organizationId=123&offset=10&max=125', {
