@@ -118,12 +118,9 @@ const parseJSONString = string => {
 };
 
 const getProjection = projection => {
-  const jsonProjection = parseJSONString(projection);
-  if (jsonProjection) {
-    return jsonProjection;
-  }
-
-  const fields = parseUnaries(projection, { plus: 1, minus: 0 });
+  const fields =
+    parseJSONString(projection) ||
+    parseUnaries(projection, { plus: 1, minus: 0 });
 
   /*
     From the MongoDB documentation:
@@ -132,7 +129,7 @@ const getProjection = projection => {
   */
   const hasMixedValues =
     Object.keys(fields).reduce((set, key) => {
-      if (key !== '_id') {
+      if (key !== '_id' && (fields[key] === 0 || fields[key] === 1)) {
         set.add(fields[key]);
       }
       return set;
