@@ -149,15 +149,10 @@ const getProjection = projection => {
   return fields;
 };
 
-const getPopulation = population => {
-  let paths = population.split(',');
-
-  paths = paths.map(path => {
+const getPopulation = population =>
+  population.split(',').map(path => {
     return { path };
   });
-
-  return paths;
-};
 
 const getSort = sort => parseUnaries(sort);
 
@@ -221,29 +216,24 @@ const getFilter = (filter, params, options) => {
 };
 
 const mergeProjectionAndPopulation = result => {
-  const projection = result.projection || {};
-  let population = result.population || [];
-
-  Object.keys(projection).forEach(key => {
-    // if field contains a .
-    if (key.indexOf('.') > -1) {
-      // Loop the population rows
-      population = population.map(row => {
-        const prefix = `${row.path}.`;
-        const unprefixedKey = key.replace(prefix, '');
+  if (result.projection && result.population) {
+    // Loop the population rows
+    result.population.forEach(row => {
+      const prefix = `${row.path}.`;
+      Object.keys(result.projection).forEach(key => {
         // If field start with the name of the path, we add it to the `select` property
         if (key.startsWith(prefix)) {
+          const unprefixedKey = key.replace(prefix, '');
           row.select = {
             ...row.select,
-            [unprefixedKey]: projection[key],
+            [unprefixedKey]: result.projection[key],
           };
+          // Remove field with . from the projection
+          delete result.projection[key];
         }
-        return row;
       });
-      // Remove field with . from the projection
-      delete projection[key];
-    }
-  });
+    });
+  }
 };
 
 const operators = [
