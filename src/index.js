@@ -146,10 +146,38 @@ const getProjection = projection => {
   return fields;
 };
 
-const getPopulation = population =>
-  population.split(',').map(path => {
-    return { path };
+const getPopulation = population => {
+  const cache = {};
+
+  function iterateLevels(levels, prevLevels = []) {
+    let populate;
+    let path;
+    const topLevel = levels.shift();
+    prevLevels.push(topLevel);
+
+    const cacheKey = prevLevels.join('.');
+    if (cache[cacheKey]) {
+      path = cache[cacheKey];
+    } else {
+      path = { path: topLevel };
+    }
+    cache[cacheKey] = path;
+
+    if (levels.length) {
+      populate = iterateLevels(levels, prevLevels);
+      if (populate) {
+        path.populate = populate;
+      }
+    }
+    return path;
+  }
+
+  const populations = population.split(',').map(path => {
+    return iterateLevels(path.split('.'));
   });
+
+  return [...new Set(populations)]; // Deduplicate array
+};
 
 const getSort = sort => parseUnaries(sort);
 
@@ -213,23 +241,29 @@ const getFilter = (filter, params, options) => {
 };
 
 const mergeProjectionAndPopulation = result => {
-  if (result.projection && result.population) {
-    // Loop the population rows
-    result.population.forEach(row => {
-      const prefix = `${row.path}.`;
+  function iteratePopulation(population, prevPrefix = '') {
+    population.forEach(row => {
+      const prefix = `${prevPrefix}${row.path}.`;
       Object.keys(result.projection).forEach(key => {
-        // If field start with the name of the path, we add it to the `select` property
         if (key.startsWith(prefix)) {
           const unprefixedKey = key.replace(prefix, '');
-          row.select = {
-            ...row.select,
-            [unprefixedKey]: result.projection[key],
-          };
-          // Remove field with . from the projection
-          delete result.projection[key];
+          if (unprefixedKey.indexOf('.') === -1) {
+            row.select = {
+              ...row.select,
+              [unprefixedKey]: result.projection[key],
+            };
+            delete result.projection[key];
+          }
         }
       });
+      if (row.populate) {
+        iteratePopulation([row.populate], prefix);
+      }
     });
+  }
+
+  if (result.projection && result.population) {
+    iteratePopulation(result.population);
   }
 };
 
