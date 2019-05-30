@@ -349,25 +349,6 @@ test('populate', t => {
   t.deepEqual(res.population, [{ path: 'a' }, { path: 'b' }, { path: 'c' }]);
 });
 
-// test('populate and projection', t => {
-//   const res = aqp('populate=a,b,c&fields=j,k,l,a.x,a.y,a.z,b.x,b.y,foo.bar');
-//   t.truthy(res);
-//   t.deepEqual(res.projection, { j: 1, k: 1, l: 1, 'foo.bar': 1 });
-//   t.deepEqual(res.population, [
-//     {
-//       path: 'a',
-//       select: { x: 1, y: 1, z: 1 },
-//     },
-//     {
-//       path: 'b',
-//       select: { x: 1, y: 1 },
-//     },
-//     {
-//       path: 'c',
-//     },
-//   ]);
-// });
-
 test('populate (nested)', t => {
   const res = aqp('populate=a,b.b1,c.c1.c2');
   t.truthy(res);
@@ -396,7 +377,6 @@ test('populate (nested)', t => {
 test('populate (nested, no duplicated)', t => {
   const res = aqp('populate=a,a.a1,a.a1.a2');
   t.truthy(res);
-  console.log(res.population);
   t.deepEqual(res.population, [
     {
       path: 'a',
