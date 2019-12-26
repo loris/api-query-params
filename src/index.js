@@ -6,18 +6,18 @@ const builtInCasters = {
 };
 
 const parseValue = (value, key, options) => {
-  // Handle comma-separated values
-  const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
-  const parts = regexes || value.split(',');
-  if (parts && parts.length > 1) {
-    return parts.map(part => parseValue(part, key, options));
-  }
-
   // Match type casting operators like string(true)
   const casters = { ...builtInCasters, ...options.casters };
   const casting = value.match(/^(\w+)\((.*)\)$/);
   if (casting && casters[casting[1]]) {
     return casters[casting[1]](casting[2]);
+  }
+
+  // Handle comma-separated values
+  const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
+  const parts = regexes || value.split(',');
+  if (parts && parts.length > 1) {
+    return parts.map(part => parseValue(part, key, options));
   }
 
   // Apply casters per params

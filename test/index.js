@@ -66,9 +66,16 @@ test('filter: null casting', t => {
 });
 
 test('filter: force casting', t => {
-  const res = aqp('key1=string(10)&key2=date(2016)&key3=string(null)');
+  const res = aqp(
+    'key1=string(10)&key2=date(2016)&key3=string(null)&key4=string(a,b,c)'
+  );
   t.truthy(res);
-  t.deepEqual(res.filter, { key1: '10', key2: new Date('2016'), key3: 'null' });
+  t.deepEqual(res.filter, {
+    key1: '10',
+    key2: new Date('2016'),
+    key3: 'null',
+    key4: 'a,b,c',
+  });
 });
 
 test('filter: custom casters', t => {
