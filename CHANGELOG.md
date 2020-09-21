@@ -1,3 +1,9 @@
+# 4.16.0 / 2020-09-21
+
+- Make built-in casting functions customizable using the `casters` option
+- Improve number detection to exclude strings greater than MAX_SAFE_INTEGER (fix #113)
+- upgrade all dependencies
+
 # 4.9.0 / 2018-11-29
 
 - projection field accepts JSON string
