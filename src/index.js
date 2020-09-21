@@ -1,8 +1,8 @@
 import qs from 'querystring';
 
 const builtInCasters = {
-  string: val => String(val),
-  date: val => new Date(String(val)),
+  string: (val) => String(val),
+  date: (val) => new Date(String(val)),
 };
 
 const parseValue = (value, key, options) => {
@@ -17,7 +17,7 @@ const parseValue = (value, key, options) => {
   const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
   const parts = regexes || value.split(',');
   if (parts && parts.length > 1) {
-    return parts.map(part => parseValue(part, key, options));
+    return parts.map((part) => parseValue(part, key, options));
   }
 
   // Apply casters per params
@@ -65,7 +65,7 @@ const parseValue = (value, key, options) => {
   return value;
 };
 
-const parseOperator = operator => {
+const parseOperator = (operator) => {
   if (operator === '=') {
     return '$eq';
   }
@@ -102,14 +102,14 @@ const parseUnaries = (unaries, values = { plus: 1, minus: -1 }) => {
     typeof unaries === 'string' ? unaries.split(',') : unaries;
 
   return unariesAsArray
-    .map(unary => unary.match(/^(\+|-)?(.*)/))
+    .map((unary) => unary.match(/^(\+|-)?(.*)/))
     .reduce((result, [, val, key]) => {
       result[key.trim()] = val === '-' ? values.minus : values.plus;
       return result;
     }, {});
 };
 
-const parseJSONString = string => {
+const parseJSONString = (string) => {
   try {
     return JSON.parse(string);
   } catch (err) {
@@ -117,7 +117,7 @@ const parseJSONString = string => {
   }
 };
 
-const getProjection = projection => {
+const getProjection = (projection) => {
   const fields =
     parseJSONString(projection) ||
     parseUnaries(projection, { plus: 1, minus: 0 });
@@ -136,7 +136,7 @@ const getProjection = projection => {
     }, new Set()).size > 1;
 
   if (hasMixedValues) {
-    Object.keys(fields).forEach(key => {
+    Object.keys(fields).forEach((key) => {
       if (fields[key] === 1) {
         delete fields[key];
       }
@@ -146,7 +146,7 @@ const getProjection = projection => {
   return fields;
 };
 
-const getPopulation = population => {
+const getPopulation = (population) => {
   const cache = {};
 
   function iterateLevels(levels, prevLevels = []) {
@@ -172,20 +172,20 @@ const getPopulation = population => {
     return path;
   }
 
-  const populations = population.split(',').map(path => {
+  const populations = population.split(',').map((path) => {
     return iterateLevels(path.split('.'));
   });
 
   return [...new Set(populations)]; // Deduplicate array
 };
 
-const getSort = sort => parseUnaries(sort);
+const getSort = (sort) => parseUnaries(sort);
 
-const getSkip = skip => Number(skip);
+const getSkip = (skip) => Number(skip);
 
-const getLimit = limit => Number(limit);
+const getLimit = (limit) => Number(limit);
 
-const parseFilter = filter => {
+const parseFilter = (filter) => {
   if (typeof filter === 'object') {
     return filter;
   }
@@ -201,7 +201,7 @@ const parseFilter = filter => {
 const getFilter = (filter, params, options) => {
   const parsedFilter = filter ? parseFilter(filter) : {};
   return Object.keys(params)
-    .map(val => {
+    .map((val) => {
       const join = params[val] ? `${val}=${params[val]}` : val;
       // Separate key, operators and value
       const [, prefix, key, op, value] = join.match(
@@ -240,11 +240,11 @@ const getFilter = (filter, params, options) => {
     }, parsedFilter);
 };
 
-const mergeProjectionAndPopulation = result => {
+const mergeProjectionAndPopulation = (result) => {
   function iteratePopulation(population, prevPrefix = '') {
-    population.forEach(row => {
+    population.forEach((row) => {
       const prefix = `${prevPrefix}${row.path}.`;
-      Object.keys(result.projection).forEach(key => {
+      Object.keys(result.projection).forEach((key) => {
         if (key.startsWith(prefix)) {
           const unprefixedKey = key.replace(prefix, '');
           if (unprefixedKey.indexOf('.') === -1) {
