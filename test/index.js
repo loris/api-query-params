@@ -25,6 +25,14 @@ test('filter: number casting', (t) => {
   });
 });
 
+test('filter: number casting (number overflow)', (t) => {
+  const res = aqp('key1=115524599024168443300');
+  t.truthy(res);
+  t.deepEqual(res.filter, {
+    key1: '115524599024168443300',
+  });
+});
+
 test('filter: boolean casting', (t) => {
   const res = aqp('key1=true&key2=false');
   t.truthy(res);

@@ -49,9 +49,14 @@ const parseValue = (value, key, options) => {
     return null;
   }
 
-  // Match numbers (string padded with zeros are not numbers)
-  if (!Number.isNaN(Number(value)) && !/^0[0-9]+/.test(value)) {
-    return Number(value);
+  // Match numbers (strings greater than MAX_SAFE_INTEGER or padded with zeros are not numbers)
+  const valueCastedAsNumber = Number(value);
+  if (
+    !Number.isNaN(valueCastedAsNumber) &&
+    Math.abs(valueCastedAsNumber) <= Number.MAX_SAFE_INTEGER &&
+    !/^0[0-9]+/.test(value)
+  ) {
+    return valueCastedAsNumber;
   }
 
   // Match YYYY-MM-DDTHH:mm:ssZ format dates
