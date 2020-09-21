@@ -296,21 +296,23 @@ aqp('id=e9117e5c-c405-489b-9c12-d9f398c7a112&apiKey=foobar', {
 
 #### Add custom casting functions
 
-You can specify you own casting functions to apply to query parameter values, either by explicitly wrapping the value in URL with your custom function name (See example below) or by implictly mapping a key to a function (See `Specify casting per param keys` below)
+You can specify you own casting functions to apply to query parameter values, either by explicitly wrapping the value in URL with your custom function name (See example below) or by implictly mapping a key to a function (See `Specify casting per param keys` below). Note that you can also override built-in casting functions: `boolean`, `date` ,`null` ,`number` ,`regex` and `string`.
 
 - `casters`: object to specify custom casters, key is the caster name, and value is a function which is passed the query parameter value as parameter.
 
 ```js
-aqp('key1=lowercase(VALUE)&key2=int(10.5)', {
+aqp('key1=lowercase(VALUE)&key2=int(10.5)&key3=true', {
   casters: {
     lowercase: val => val.toLowerCase(),
     int: val => parseInt(val, 10),
+    boolean: val => (val === 'true' ? '1' : '0'),
   },
 });
 // {
 //   filter: {
 //     key1: 'value',
 //     key2: 10,
+//     key3: '1',
 //   }
 // }
 ```

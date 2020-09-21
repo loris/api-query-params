@@ -1,8 +1,12 @@
 import qs from 'querystring';
 
 const builtInCasters = {
+  boolean: (val) => val === 'true',
+  date: (val) => new Date(val),
+  null: () => null,
+  number: (val) => Number(val),
+  regex: (val, flags) => new RegExp(val, flags),
   string: (val) => String(val),
-  date: (val) => new Date(String(val)),
 };
 
 const parseValue = (value, key, options) => {
@@ -32,31 +36,26 @@ const parseValue = (value, key, options) => {
   // Match regex operators like /foo_\d+/i
   const regex = value.match(/^\/(.*)\/([igm]*)$/);
   if (regex) {
-    return new RegExp(regex[1], regex[2]);
+    return casters.regex(regex[1], regex[2]);
   }
 
   // Match boolean values
-  if (value === 'true') {
-    return true;
-  }
-
-  if (value === 'false') {
-    return false;
+  if (value === 'true' || value === 'false') {
+    return casters.boolean(value);
   }
 
   // Match null
   if (value === 'null') {
-    return null;
+    return casters.null(value);
   }
 
   // Match numbers (strings greater than MAX_SAFE_INTEGER or padded with zeros are not numbers)
-  const valueCastedAsNumber = Number(value);
   if (
-    !Number.isNaN(valueCastedAsNumber) &&
-    Math.abs(valueCastedAsNumber) <= Number.MAX_SAFE_INTEGER &&
+    !Number.isNaN(Number(value)) &&
+    Math.abs(value) <= Number.MAX_SAFE_INTEGER &&
     !/^0[0-9]+/.test(value)
   ) {
-    return valueCastedAsNumber;
+    return casters.number(value);
   }
 
   // Match YYYY-MM-DDTHH:mm:ssZ format dates
@@ -64,10 +63,11 @@ const parseValue = (value, key, options) => {
     /^[12]\d{3}(-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?)(T| )?(([01][0-9]|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/
   );
   if (date) {
-    return new Date(value);
+    return casters.date(value);
   }
 
-  return value;
+  // Default to string
+  return casters.string(value);
 };
 
 const parseOperator = (operator) => {

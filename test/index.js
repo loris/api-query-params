@@ -97,6 +97,18 @@ test('filter: custom casters', (t) => {
   t.deepEqual(res.filter, { key1: 'value', key2: 10 });
 });
 
+test('filter: customize built-in casters', (t) => {
+  const res = aqp('key1=10&key2=true&key3=VALUE', {
+    casters: {
+      number: (val) => val,
+      boolean: (val) => (val === 'true' ? '1' : '0'),
+      string: (val) => val.toLowerCase(),
+    },
+  });
+  t.truthy(res);
+  t.deepEqual(res.filter, { key1: '10', key2: '1', key3: 'value' });
+});
+
 test('filter: force param casting', (t) => {
   const res = aqp(
     'key1=VALUE&key2=10.5&key3=20&key4=foo&key5=   foo   ,  bar',
