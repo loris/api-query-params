@@ -12,7 +12,9 @@ const builtInCasters = {
 const parseValue = (value, key, options) => {
   // Match type casting operators like string(true)
   const casters = { ...builtInCasters, ...options.casters };
-  const casting = value.match(/^(\w+)\((.*)\)$/);
+  const castersList = Object.keys(casters).join('|');
+  const castersRegexp = new RegExp(`^(${castersList})\\(([^)]*)\\)$`);
+  const casting = value.match(castersRegexp);
   if (casting && casters[casting[1]]) {
     return casters[casting[1]](casting[2]);
   }

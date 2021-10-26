@@ -185,10 +185,22 @@ test('filter: $in operator (multiple keys)', (t) => {
   t.deepEqual(res.filter, { key: { $in: ['a', 'b'] } });
 });
 
+test('filter: $in operator (multiple keys), with casters', (t) => {
+  const res = aqp('key=string(1)&key=string(2)');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: { $in: ['1', '2'] } });
+});
+
 test('filter: $in operator (comma-separated)', (t) => {
   const res = aqp('key=a,b');
   t.truthy(res);
   t.deepEqual(res.filter, { key: { $in: ['a', 'b'] } });
+});
+
+test('filter: $in operator (comma-separated), with casters', (t) => {
+  const res = aqp('key=string(1),string(2)');
+  t.truthy(res);
+  t.deepEqual(res.filter, { key: { $in: ['1', '2'] } });
 });
 
 test('filter: $in operator (comma-separated regexes)', (t) => {
