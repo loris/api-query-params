@@ -4,8 +4,10 @@
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "dist/cjs/index.js",
   "files": [
-    "dist/"
+    "dist/",
+    "./types.d.ts"
   ],
+  "types": "./types.d.ts",
   "scripts": {
     "build": "babel ./src/index.js --out-file ./dist/cjs/index.js",
     "coverage": "nyc npm test && nyc report --reporter=html",
