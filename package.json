@@ -3,13 +3,12 @@
   "version": "5.1.0",
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "dist/cjs/index.js",
+  "types": "dist/cjs/types.d.ts",
   "files": [
-    "dist/",
-    "./types.d.ts"
+    "dist/"
   ],
-  "types": "./types.d.ts",
   "scripts": {
-    "build": "babel ./src/index.js --out-file ./dist/cjs/index.js",
+    "build": "babel ./src/index.js --out-file ./dist/cjs/index.js && shx cp ./types.d.ts ./dist/cjs/",
     "coverage": "nyc npm test && nyc report --reporter=html",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint ./src ./test",
@@ -35,7 +34,6 @@
     "url": "https://github.com/loris/api-query-params/issues"
   },
   "homepage": "https://github.com/loris/api-query-params#readme",
-  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "7.11.6",
     "@babel/core": "7.11.6",
@@ -50,6 +48,7 @@
     "np": "6.5.0",
     "nyc": "15.1.0",
     "prettier": "2.1.2",
-    "rimraf": "3.0.2"
+    "rimraf": "3.0.2",
+    "shx": "^0.3.3"
   }
 }
