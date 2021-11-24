@@ -229,13 +229,15 @@ const getFilter = (filter, params, options) => {
     .reduce((result, { prefix, key, op, value }) => {
       if (!result[key]) {
         result[key] = {};
+      } else if (typeof result[key] === 'string') {
+        result[key] = { $eq: result[key] };
       }
 
       if (Array.isArray(value)) {
         result[key][op === '$ne' ? '$nin' : '$in'] = value;
       } else if (op === '$exists') {
         result[key][op] = prefix !== '!';
-      } else if (op === '$eq') {
+      } else if (op === '$eq' && Object.entries(result[key]).length === 0) {
         result[key] = value;
       } else if (op === '$ne' && typeof value === 'object' && value !== null) {
         result[key].$not = value;

@@ -525,3 +525,12 @@ test('filter: handles value with slashes', (t) => {
     key: 'foo/bar',
   });
 });
+
+test('duplicate key with different operators (fix #133)', (t) => {
+  t.deepEqual(aqp('key=a&key!=b').filter, {
+    key: { $eq: 'a', $ne: 'b' },
+  });
+  t.deepEqual(aqp('key!=a&key=b').filter, {
+    key: { $ne: 'a', $eq: 'b' },
+  });
+});
