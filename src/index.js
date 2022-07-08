@@ -306,4 +306,4 @@ const aqp = (query = '', options = {}) => {
   return result;
 };
 
-module.exports.default = aqp;
+module.exports = aqp;
