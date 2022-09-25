@@ -1,6 +1,6 @@
 {
   "name": "api-query-params",
-  "version": "5.3.1",
+  "version": "5.4.0",
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "dist/cjs/index.js",
   "types": "dist/cjs/types.d.ts",
