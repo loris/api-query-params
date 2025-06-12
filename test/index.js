@@ -534,3 +534,13 @@ test('duplicate key with different operators (fix #133)', (t) => {
     key: { $ne: 'a', $eq: 'b' },
   });
 });
+
+test('filter: file path with slashes and wildcard regex (fix #151)', (t) => {
+  const res = aqp({ file: '/^path/to/my/file_.+\\.tld/' });
+  t.deepEqual(res.filter, { file: /^path\/to\/my\/file_.+\.tld/ });
+});
+
+test('filter: file path with slashes as string (fix #151)', (t) => {
+  const res = aqp({ file: 'path/to/my/file_123.tld' });
+  t.deepEqual(res.filter, { file: 'path/to/my/file_123.tld' });
+});
