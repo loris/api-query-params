@@ -1,4 +1,4 @@
-import qs from 'querystring';
+
 
 const builtInCasters = {
   boolean: (val) => val === 'true',
@@ -119,7 +119,9 @@ const parseUnaries = (unaries, values = { plus: 1, minus: -1 }) => {
 const parseJSONString = (string) => {
   try {
     return JSON.parse(string);
-  } catch (err) {
+  } 
+  // eslint-disable-next-line no-unused-vars
+  catch (_err) {
     return false;
   }
 };
@@ -287,7 +289,25 @@ const operators = [
 
 const aqp = (query = '', options = {}) => {
   const result = {};
-  const params = typeof query === 'string' ? qs.parse(query) : query;
+  let params;
+
+  if (typeof query === 'string') {
+    params = {};
+    const urlSearchParams = new URLSearchParams(query);
+    for (const [key, value] of urlSearchParams.entries()) {
+      if (params[key]) {
+        if (Array.isArray(params[key])) {
+          params[key].push(value);
+        } else {
+          params[key] = [params[key], value];
+        }
+      } else {
+        params[key] = value;
+      }
+    }
+  } else {
+    params = query;
+  }
 
   options.blacklist = options.blacklist || [];
 
@@ -306,5 +326,4 @@ const aqp = (query = '', options = {}) => {
   return result;
 };
 
-module.exports = aqp;
-module.exports.default = aqp;
+export default aqp;
