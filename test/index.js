@@ -1,12 +1,7 @@
 import test from 'ava';
-import aqp from '../src';
+import aqp from '../src/index.js';
 
-const requiredAqp = require('../src');
 
-test('module imported using require', (t) => {
-  const res = requiredAqp('key=value');
-  t.truthy(res);
-});
 
 test('filter: basic', (t) => {
   const res = aqp('key=value');
