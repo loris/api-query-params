@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
-          scope: 'businessinsider'
+          scope: '@businessinsider'
           
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -31,7 +31,7 @@ jobs:
       - name: Publish to GitHub Package Registry
         run: |
           # Configure registry authentication
-          echo "@your-username:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "@businessinsider:registry=https://npm.pkg.github.com" >> .npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
           
           yarn publish        
