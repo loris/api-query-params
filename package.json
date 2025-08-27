@@ -1,5 +1,5 @@
 {
-  "name": "api-query-params",
+  "name": "@businessinsider/api-query-params",
   "version": "7.0.1",
   "description": "Convert query parameters from API urls to MongoDB queries",
   "main": "src/index.js",
