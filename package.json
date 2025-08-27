@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/loris/api-query-params.git"
+    "url": "git+https://github.com/businessinsider/api-query-params.git"
   },
   "keywords": [
     "node",
@@ -31,12 +31,12 @@
     "query parameters",
     "mongodb"
   ],
-  "author": "Loris Guignard <loris.guignard@gmail.com>",
+  "author": "David McConnell <dmcconnell@insider.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/loris/api-query-params/issues"
+    "url": "https://github.com/businessinsider/api-query-params/issues"
   },
-  "homepage": "https://github.com/loris/api-query-params#readme",
+  "homepage": "https://github.com/businessinsider/api-query-params#readme",
   "devDependencies": {
     "ava": "^6.1.3",
     "coveralls": "^3.1.1",

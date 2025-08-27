@@ -29,6 +29,11 @@ jobs:
         run: yarn run prepublish
         
       - name: Publish to GitHub Package Registry
-        run: yarn publish
+        run: |
+          # Configure registry authentication
+          echo "@your-username:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          
+          yarn publish        
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
