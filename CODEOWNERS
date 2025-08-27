@@ -1,0 +1,10 @@
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# DAD (default approval)
+* @businessinsider/dad-engineers
+
+# Cloud Infrastructure / Devops Resources
+/infrastructure/terraform/ @businessinsider/dad-engineers @businessinsider/cloud-engineering
+/deployments/              @businessinsider/dad-engineers @businessinsider/cloud-engineering
+atlantis-*                 @businessinsider/dad-engineers @businessinsider/cloud-engineering
+/.github/                  @businessinsider/dad-engineers @businessinsider/cloud-engineering
