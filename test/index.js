@@ -174,16 +174,16 @@ test('filter: $not operator (with regex)', (t) => {
   t.deepEqual(res.filter, { key: { $not: /value/ } });
 });
 
-test('filter: $in operator (multiple keys)', (t) => {
+test('filter: $all operator (multiple keys)', (t) => {
   const res = aqp('key=a&key=b');
   t.truthy(res);
-  t.deepEqual(res.filter, { key: { $in: ['a', 'b'] } });
+  t.deepEqual(res.filter, {$and:[{key:"a"},{key:"b"}]});
 });
 
-test('filter: $in operator (multiple keys), with casters', (t) => {
+test('filter: $all operator (multiple keys), with casters', (t) => {
   const res = aqp('key=string(1)&key=string(2)');
   t.truthy(res);
-  t.deepEqual(res.filter, { key: { $in: ['1', '2'] } });
+  t.deepEqual(res.filter, {$and:[{key:"1"},{key:"2"}]});
 });
 
 test('filter: $in operator (comma-separated)', (t) => {
@@ -212,8 +212,9 @@ test('filter: $in operator (comma-separated regexes containing commas)', (t) => 
 
 test('filter: $nin operator (multiple keys)', (t) => {
   const res = aqp('key!=a&key!=b');
+  // console.log(JSON.stringify(res));
   t.truthy(res);
-  t.deepEqual(res.filter, { key: { $nin: ['a', 'b'] } });
+  t.deepEqual(res.filter, {$and:[{key:{$ne:"a"}},{key:{$ne:"b"}}]});
 });
 
 test('filter: $nin operator (comma-separated)', (t) => {
@@ -484,10 +485,10 @@ test('complex response', (t) => {
       key1: 'a',
       key2: { $in: [true, 'c'] },
       key3: '10',
-      key4: { $gt: 4, $lte: 15 },
       key5: /foo/i,
       key6: { $exists: true },
       key7: { $exists: false },
+      $and: [{ key4: { $gt: 4 } }, { key4: { $lte: 15 } }]
     },
     skip: 10,
     limit: 50,
@@ -522,10 +523,29 @@ test('filter: handles value with slashes', (t) => {
 });
 
 test('duplicate key with different operators (fix #133)', (t) => {
-  t.deepEqual(aqp('key=a&key!=b').filter, {
-    key: { $eq: 'a', $ne: 'b' },
+  t.deepEqual(aqp('key=a&key!=b').filter, { 
+    $and: [{ key: "a" }, { key: { $ne: "b" } }] 
   });
+  
   t.deepEqual(aqp('key!=a&key=b').filter, {
-    key: { $ne: 'a', $eq: 'b' },
-  });
+    $and:[{key:{$ne:"a"}},{key:"b"}]
+  }
+  );
+
 });
+
+///
+test('filter: handles complex BI filtering needs', (t) => {
+  const res = aqp('test=something&test=somethingelse&tags=author:tim-jones&tags=format:story&tags=category:tech,category:505b807b69beddbb5000000e').filter;
+  t.truthy(res);
+  t.deepEqual(res, {
+    $and:[{test:"something"}, {test:"somethingelse"}, {tags:"author:tim-jones"},{tags:"format:story"},{tags:{$in:["category:tech","category:505b807b69beddbb5000000e"]}}]
+  });
+
+});  
+
+test('filter:', (t) => {
+  const res = aqp('country=GB,US').filter;
+  console.log(JSON.stringify(res));
+  t.truthy(res);
+});  

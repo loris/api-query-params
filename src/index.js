@@ -1,5 +1,3 @@
-
-
 const builtInCasters = {
   boolean: (val) => val === 'true',
   date: (val) => new Date(val),
@@ -209,46 +207,104 @@ const parseFilter = (filter) => {
 
 const getFilter = (filter, params, options) => {
   const parsedFilter = filter ? parseFilter(filter) : {};
-  return Object.keys(params)
-    .map((val) => {
-      const join = params[val] ? `${val}=${params[val]}` : val;
-      // Separate key, operators and value
-      const [, prefix, key, op, value] = join.match(
-        /(!?)([^><!=]+)([><]=?|!?=|)(.*)/
-      );
-      return {
-        prefix,
-        key,
-        op: parseOperator(op),
-        value: parseValue(value, key, options),
-      };
-    })
-    .filter(
-      ({ key }) =>
-        options.blacklist.indexOf(key) === -1 &&
-        (!options.whitelist || options.whitelist.indexOf(key) !== -1)
-    )
-    .reduce((result, { prefix, key, op, value }) => {
-      if (!result[key]) {
-        result[key] = {};
-      } else if (typeof result[key] === 'string') {
-        result[key] = { $eq: result[key] };
-      }
-
+  
+  // Parse all parameter conditions and group by key
+  const conditionsByKey = Object.keys(params)
+    .reduce((acc, paramKey) => {
+      const paramValues = Array.isArray(params[paramKey]) ? params[paramKey] : [params[paramKey]];
+      
+      paramValues.forEach(paramValue => {
+        const join = paramValue ? `${paramKey}=${paramValue}` : paramKey;
+        const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
+        
+        if (options.blacklist.indexOf(key) === -1 && 
+            (!options.whitelist || options.whitelist.indexOf(key) !== -1)) {
+          
+          if (!acc[key]) {
+            acc[key] = [];
+          }
+          
+          acc[key].push({
+            prefix,
+            key,
+            op: parseOperator(op),
+            value: parseValue(value, key, options),
+          });
+        }
+      });
+      
+      return acc;
+    }, {});
+  
+  // Build final query
+  let finalQuery = { ...parsedFilter };
+  const andConditions = [];
+  
+  Object.keys(conditionsByKey).forEach(key => {
+    const conditions = conditionsByKey[key];
+    
+    if (conditions.length === 1) {
+      // Single condition for this key
+      const { prefix, op, value } = conditions[0];
+      
       if (Array.isArray(value)) {
-        result[key][op === '$ne' ? '$nin' : '$in'] = value;
+        // Comma-separated values: use $in/$nin for OR logic within the same parameter
+        if (op === '$ne') {
+          finalQuery[key] = { $nin: value };
+        } else {
+          finalQuery[key] = { $in: value };
+        }
       } else if (op === '$exists') {
-        result[key][op] = prefix !== '!';
-      } else if (op === '$eq' && Object.entries(result[key]).length === 0) {
-        result[key] = value;
+        finalQuery[key] = { [op]: prefix !== '!' };
       } else if (op === '$ne' && typeof value === 'object' && value !== null) {
-        result[key].$not = value;
+        finalQuery[key] = { $not: value };
       } else {
-        result[key][op] = value;
+        // Single value conditions
+        if (op === '$eq') {
+          finalQuery[key] = value;
+        } else {
+          finalQuery[key] = { [op]: value };
+        }
       }
-
-      return result;
-    }, parsedFilter);
+    } else {
+      // Multiple conditions for the same key
+      const keyConditions = conditions.map(({ prefix, op, value }) => {
+        if (Array.isArray(value)) {
+          // Comma-separated values: use $in/$nin for OR logic
+          if (op === '$ne') {
+            return { [key]: { $nin: value } };
+          } else {
+            return { [key]: { $in: value } };
+          }
+        } else if (op === '$exists') {
+          return { [key]: { [op]: prefix !== '!' } };
+        } else if (op === '$ne' && typeof value === 'object' && value !== null) {
+          return { [key]: { $not: value } };
+        } else {
+          // Single value conditions
+          if (op === '$eq') {
+            return { [key]: value };
+          } else {
+            return { [key]: { [op]: value } };
+          }
+        }
+      });
+      
+      // Add conditions to the $and array
+      andConditions.push(...keyConditions);
+    }
+  });
+  
+  // Add any additional $and conditions to the final query
+  if (andConditions.length > 0) {
+    if (finalQuery.$and) {
+      finalQuery.$and.push(...andConditions);
+    } else {
+      finalQuery.$and = andConditions;
+    }
+  }
+  
+  return finalQuery;
 };
 
 const mergeProjectionAndPopulation = (result) => {
