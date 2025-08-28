@@ -3,7 +3,7 @@
 > [!NOTE]
 > This is the Business Insider fork of [api-query-params](https://www.npmjs.com/package/api-query-params), changing how the filter is built. The existing implementation uses an `$in` for all statements - effectively applying a boolean OR. 
 > We want to AND each term together, so we have replaced the `getFilter()` method and updated the tests to reflect this. 
-> The existing README below is still correct - all features of the library are still supported. The main behaviour change is that `&` in the filter query is equivalent  of a boolean AND.
+> The existing README below is still correct - all features of the library are still supported. The main behaviour change is that `&` in the filter query is equivalent of a boolean AND.
 
 [![NPM version][npm-image]][npm-url]
 

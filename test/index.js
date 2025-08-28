@@ -212,7 +212,6 @@ test('filter: $in operator (comma-separated regexes containing commas)', (t) => 
 
 test('filter: $nin operator (multiple keys)', (t) => {
   const res = aqp('key!=a&key!=b');
-  // console.log(JSON.stringify(res));
   t.truthy(res);
   t.deepEqual(res.filter, {$and:[{key:{$ne:"a"}},{key:{$ne:"b"}}]});
 });
@@ -546,6 +545,5 @@ test('filter: handles complex BI filtering needs', (t) => {
 
 test('filter:', (t) => {
   const res = aqp('country=GB,US').filter;
-  console.log(JSON.stringify(res));
   t.truthy(res);
 });  
