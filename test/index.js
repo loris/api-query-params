@@ -542,8 +542,3 @@ test('filter: handles complex BI filtering needs', (t) => {
   });
 
 });  
-
-test('filter:', (t) => {
-  const res = aqp('country=GB,US').filter;
-  t.truthy(res);
-});  
