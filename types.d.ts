@@ -1,4 +1,4 @@
-declare module 'api-query-params' {
+declare module '@businessinsider/api-query-params' {
   type PopulateOptions = {
     path: string;
     select?: any;
