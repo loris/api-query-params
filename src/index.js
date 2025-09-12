@@ -18,8 +18,9 @@ const parseValue = (value, key, options) => {
   }
 
   // Handle comma-separated values
-  const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
-  const parts = regexes || value.split(',');
+  const parts = value.match(/^\/.*\/(?:[igm]*)$/g) // Regex should start with / and end with / + flags
+    ? value.match(/\/.*?\/(?:[igm]*)/g) // Extract all regex parts, ignoring what is between them
+    : value.split(','); // Split by comma otherwise
   if (parts && parts.length > 1) {
     return parts.map((part) => parseValue(part, key, options));
   }
@@ -117,7 +118,7 @@ const parseUnaries = (unaries, values = { plus: 1, minus: -1 }) => {
 const parseJSONString = (string) => {
   try {
     return JSON.parse(string);
-  } 
+  }
   // eslint-disable-next-line no-unused-vars
   catch (_err) {
     return false;
@@ -207,23 +208,23 @@ const parseFilter = (filter) => {
 
 const getFilter = (filter, params, options) => {
   const parsedFilter = filter ? parseFilter(filter) : {};
-  
+
   // Parse all parameter conditions and group by key
   const conditionsByKey = Object.keys(params)
     .reduce((acc, paramKey) => {
       const paramValues = Array.isArray(params[paramKey]) ? params[paramKey] : [params[paramKey]];
-      
+
       paramValues.forEach(paramValue => {
         const join = paramValue ? `${paramKey}=${paramValue}` : paramKey;
         const [, prefix, key, op, value] = join.match(/(!?)([^><!=]+)([><]=?|!?=|)(.*)/);
-        
-        if (options.blacklist.indexOf(key) === -1 && 
+
+        if (options.blacklist.indexOf(key) === -1 &&
             (!options.whitelist || options.whitelist.indexOf(key) !== -1)) {
-          
+
           if (!acc[key]) {
             acc[key] = [];
           }
-          
+
           acc[key].push({
             prefix,
             key,
@@ -232,21 +233,21 @@ const getFilter = (filter, params, options) => {
           });
         }
       });
-      
+
       return acc;
     }, {});
-  
+
   // Build final query
   let finalQuery = { ...parsedFilter };
   const andConditions = [];
-  
+
   Object.keys(conditionsByKey).forEach(key => {
     const conditions = conditionsByKey[key];
-    
+
     if (conditions.length === 1) {
       // Single condition for this key
       const { prefix, op, value } = conditions[0];
-      
+
       if (Array.isArray(value)) {
         // Comma-separated values: use $in/$nin for OR logic within the same parameter
         if (op === '$ne') {
@@ -289,12 +290,12 @@ const getFilter = (filter, params, options) => {
           }
         }
       });
-      
+
       // Add conditions to the $and array
       andConditions.push(...keyConditions);
     }
   });
-  
+
   // Add any additional $and conditions to the final query
   if (andConditions.length > 0) {
     if (finalQuery.$and) {
@@ -303,7 +304,7 @@ const getFilter = (filter, params, options) => {
       finalQuery.$and = andConditions;
     }
   }
-  
+
   return finalQuery;
 };
 

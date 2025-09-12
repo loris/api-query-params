@@ -1,8 +1,6 @@
 import test from 'ava';
 import aqp from '../src/index.js';
 
-
-
 test('filter: basic', (t) => {
   const res = aqp('key=value');
   t.truthy(res);
@@ -522,10 +520,10 @@ test('filter: handles value with slashes', (t) => {
 });
 
 test('duplicate key with different operators (fix #133)', (t) => {
-  t.deepEqual(aqp('key=a&key!=b').filter, { 
-    $and: [{ key: "a" }, { key: { $ne: "b" } }] 
+  t.deepEqual(aqp('key=a&key!=b').filter, {
+    $and: [{ key: "a" }, { key: { $ne: "b" } }]
   });
-  
+
   t.deepEqual(aqp('key!=a&key=b').filter, {
     $and:[{key:{$ne:"a"}},{key:"b"}]
   }
@@ -540,5 +538,17 @@ test('filter: handles complex BI filtering needs', (t) => {
   t.deepEqual(res, {
     $and:[{test:"something"}, {test:"somethingelse"}, {tags:"author:tim-jones"},{tags:"format:story"},{tags:{$in:["category:tech","category:505b807b69beddbb5000000e"]}}]
   });
+});
 
-});  
+test('filter: handles complex BI filtering needs with slugs with multiple /', (t) => {
+  const res = aqp('data.slug=a/b/c/d,e/f,z/y/x&data.slug=/a/b/c,/d/e/f&data.slug=a/b/,c/d/&data.slug=/regex/,/regex,with,comma/').filter;
+  t.truthy(res);
+  t.deepEqual(res, {
+    $and:[
+      {"data.slug": { $in: ["a/b/c/d", "e/f", "z/y/x"] }},
+      {"data.slug": { $in: ["/a/b/c", "/d/e/f"] }},
+      {"data.slug": { $in: ["a/b/", "c/d/"] }},
+      {"data.slug": { $in: [/regex/, /regex,with,comma/] }}
+    ]
+  });
+});
