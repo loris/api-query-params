@@ -539,3 +539,25 @@ test('filter: file path with slashes as string (fix #151)', (t) => {
   const res = aqp({ file: 'path/to/my/file_123.tld' });
   t.deepEqual(res.filter, { file: 'path/to/my/file_123.tld' });
 });
+
+test('filter: $ne operator with custom caster returning object (fix #149)', (t) => {
+  // Simulates ObjectId or similar object-returning caster
+  class ObjectId {
+    constructor(value) {
+      this.value = value;
+    }
+  }
+  const res = aqp('_id!=64514704b973cc48c724d563', {
+    casters: {
+      mongoId: (val) => new ObjectId(val),
+    },
+    castParams: {
+      _id: 'mongoId',
+    },
+  });
+  t.truthy(res);
+  t.truthy(res.filter._id.$ne);
+  t.falsy(res.filter._id.$not);
+  t.true(res.filter._id.$ne instanceof ObjectId);
+  t.is(res.filter._id.$ne.value, '64514704b973cc48c724d563');
+});
