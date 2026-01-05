@@ -19,11 +19,21 @@ const parseValue = (value, key, options) => {
     return casters[casting[1]](casting[2]);
   }
 
-  // Handle comma-separated values
-  const regexes = value.match(/\/.*?\/(?:[igm]*)/g);
-  const parts = regexes || value.split(',');
-  if (parts && parts.length > 1) {
-    return parts.map((part) => parseValue(part, key, options));
+  // Handle comma-separated regexes: /a/,/b/ or /a,b/,/b,a/
+  if (/^(\/.*?\/[igm]*,)+(\/.*?\/[igm]*)$/.test(value)) {
+    return value.split(/,(?=\/)/).map((part) => parseValue(part, key, options));
+  }
+
+  // Match regex operators like /foo_\d+/i
+  const regex = value.match(/^\/(.*)\/([igm]*)$/);
+  if (regex) {
+    return casters.regex(regex[1], regex[2]);
+  }
+
+  // Only split on commas if the value is not a regex and does not look like a file path with slashes
+  // If the value contains a comma and does not contain unescaped slashes (not a regex), split
+  if (value.includes(',') && !/^\/.+\/[igm]*$/.test(value)) {
+    return value.split(',').map((part) => parseValue(part, key, options));
   }
 
   // Apply casters per params
@@ -33,12 +43,6 @@ const parseValue = (value, key, options) => {
     casters[options.castParams[key]]
   ) {
     return casters[options.castParams[key]](value);
-  }
-
-  // Match regex operators like /foo_\d+/i
-  const regex = value.match(/^\/(.*)\/([igm]*)$/);
-  if (regex) {
-    return casters.regex(regex[1], regex[2]);
   }
 
   // Match boolean values
