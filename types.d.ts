@@ -26,6 +26,7 @@ declare module 'api-query-params' {
       sortKey?: string;
       filterKey?: string;
       populationKey?: string;
+      populationMaxDepth?: number;
 
       blacklist?: string[];
       whitelist?: string[];

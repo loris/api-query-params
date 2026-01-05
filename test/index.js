@@ -561,3 +561,57 @@ test('filter: $ne operator with custom caster returning object (fix #149)', (t) 
   t.true(res.filter._id.$ne instanceof ObjectId);
   t.is(res.filter._id.$ne.value, '64514704b973cc48c724d563');
 });
+
+test('populate: limit depth with populationMaxDepth=1 (fix #141)', (t) => {
+  const res = aqp('populate=by.by.by.by', { populationMaxDepth: 1 });
+  t.truthy(res);
+  t.deepEqual(res.population, [{ path: 'by' }]);
+});
+
+test('populate: limit depth with populationMaxDepth=2 (fix #141)', (t) => {
+  const res = aqp('populate=a.b.c.d', { populationMaxDepth: 2 });
+  t.truthy(res);
+  t.deepEqual(res.population, [
+    {
+      path: 'a',
+      populate: {
+        path: 'b',
+      },
+    },
+  ]);
+});
+
+test('populate: populationMaxDepth with multiple paths (fix #141)', (t) => {
+  const res = aqp('populate=a.a1.a2,b.b1', { populationMaxDepth: 2 });
+  t.truthy(res);
+  t.deepEqual(res.population, [
+    {
+      path: 'a',
+      populate: {
+        path: 'a1',
+      },
+    },
+    {
+      path: 'b',
+      populate: {
+        path: 'b1',
+      },
+    },
+  ]);
+});
+
+test('populate: no depth limit when populationMaxDepth is not set (fix #141)', (t) => {
+  const res = aqp('populate=a.b.c');
+  t.truthy(res);
+  t.deepEqual(res.population, [
+    {
+      path: 'a',
+      populate: {
+        path: 'b',
+        populate: {
+          path: 'c',
+        },
+      },
+    },
+  ]);
+});

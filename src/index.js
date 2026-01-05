@@ -159,10 +159,11 @@ const getProjection = (projection) => {
   return fields;
 };
 
-const getPopulation = (population) => {
+const getPopulation = (population, params, options) => {
   const cache = {};
+  const maxDepth = options.populationMaxDepth;
 
-  function iterateLevels(levels, prevLevels = []) {
+  function iterateLevels(levels, prevLevels = [], depth = 1) {
     let populate;
     let path;
     const topLevel = levels.shift();
@@ -176,8 +177,9 @@ const getPopulation = (population) => {
     }
     cache[cacheKey] = path;
 
-    if (levels.length) {
-      populate = iterateLevels(levels, prevLevels);
+    // Only continue nesting if we haven't reached maxDepth (when set)
+    if (levels.length && (maxDepth === undefined || depth < maxDepth)) {
+      populate = iterateLevels(levels, prevLevels, depth + 1);
       if (populate) {
         path.populate = populate;
       }
