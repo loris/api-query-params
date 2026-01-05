@@ -245,7 +245,7 @@ const getFilter = (filter, params, options) => {
         result[key][op] = prefix !== '!';
       } else if (op === '$eq' && Object.entries(result[key]).length === 0) {
         result[key] = value;
-      } else if (op === '$ne' && typeof value === 'object' && value !== null) {
+      } else if (op === '$ne' && value instanceof RegExp) {
         result[key].$not = value;
       } else {
         result[key][op] = value;
