@@ -76,33 +76,16 @@ const parseValue = (value, key, options) => {
   return casters.string(value);
 };
 
-const parseOperator = (operator) => {
-  if (operator === '=') {
-    return '$eq';
-  }
-
-  if (operator === '!=') {
-    return '$ne';
-  }
-
-  if (operator === '>') {
-    return '$gt';
-  }
-
-  if (operator === '>=') {
-    return '$gte';
-  }
-
-  if (operator === '<') {
-    return '$lt';
-  }
-
-  if (operator === '<=') {
-    return '$lte';
-  }
-
-  return '$exists';
+const operatorMap = {
+  '=': '$eq',
+  '!=': '$ne',
+  '>': '$gt',
+  '>=': '$gte',
+  '<': '$lt',
+  '<=': '$lte',
 };
+
+const parseOperator = (operator) => operatorMap[operator] || '$exists';
 
 /**
  * Map/reduce helper to transform list of unaries
@@ -231,8 +214,8 @@ const getFilter = (filter, params, options) => {
     })
     .filter(
       ({ key }) =>
-        options.blacklist.indexOf(key) === -1 &&
-        (!options.whitelist || options.whitelist.indexOf(key) !== -1)
+        !options.blacklist.includes(key) &&
+        (!options.whitelist || options.whitelist.includes(key))
     )
     .reduce((result, { prefix, key, op, value }) => {
       if (!result[key]) {
@@ -264,7 +247,7 @@ const mergeProjectionAndPopulation = (result) => {
       Object.keys(result.projection).forEach((key) => {
         if (key.startsWith(prefix)) {
           const unprefixedKey = key.replace(prefix, '');
-          if (unprefixedKey.indexOf('.') === -1) {
+          if (!unprefixedKey.includes('.')) {
             row.select = {
               ...row.select,
               [unprefixedKey]: result.projection[key],
