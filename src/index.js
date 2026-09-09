@@ -1,5 +1,9 @@
 
 
+// Query-string keys that must never be used as an object key, because writing
+// through them mutates Object.prototype for the whole process.
+const FORBIDDEN_KEYS = ['__proto__', 'constructor', 'prototype'];
+
 const builtInCasters = {
   boolean: (val) => val === 'true',
   date: (val) => new Date(val),
@@ -214,6 +218,11 @@ const getFilter = (filter, params, options) => {
     })
     .filter(
       ({ key }) =>
+        // Keys that would walk into Object.prototype are always rejected:
+        // `result['__proto__'][op] = value` writes onto the prototype of every
+        // object in the process (prototype pollution), and neither name is a
+        // usable Mongo field anyway.
+        !FORBIDDEN_KEYS.includes(key) &&
         !options.blacklist.includes(key) &&
         (!options.whitelist || options.whitelist.includes(key))
     )
